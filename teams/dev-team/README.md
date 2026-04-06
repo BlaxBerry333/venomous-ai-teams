@@ -74,10 +74,13 @@ cd your-project && claude
 │   ├ 影响分析三层穷举                                   │
 │   └ 输出 design.md + dev-tasks.md                    │
 │       │                                             │
-│   调度器 grep 辅助 ──> 验证官 agent                    │
-│                        ├ 对抗性审查 + 直接修补         │
+│   调度器 grep 辅助 + doc-lint 确定性校验                │
+│       │                                             │
+│       └──> 验证官 agent (附 doc-lint 结果)            │
+│            ├ 对抗性审查 A-D + 事实性穷举 E            │
+│            ├ 直接修补                                │
 │       <── fail 自动循环 (最多 3 轮) <──               │
-│                        └ verdict: pass / fail       │
+│            └ verdict: pass / fail                   │
 │                                                     │
 └──────────────────── phase: verified ────────────────┘
     │
@@ -209,6 +212,17 @@ command 入口校验 phase，防止跳步骤。中间状态 (designing / develop
 2. **Prompt 约束** : agent prompt 禁止通过 Bash 写文件
 3. **事后验证** : 调度器在 agent 返回后执行 git diff 检查变更范围
 
+### 确定性文档校验 (doc-lint)
+
+代码有 tsc/eslint/build/test 兜底，文档也需要确定性验证。调度器在 spawn 验证官之前自动执行 `doc-lint.sh`：
+
+- 文件存在性：design.md 中引用的文件是否真的存在
+- API 端点计数：design.md 声称的端点数 vs 项目 router 中的实际定义数
+- 影响分析覆盖：影响分析中的每个条目是否在 dev-tasks.md 中有对应任务
+- 任务文件引用：dev-tasks.md 中引用的文件路径是否存在
+
+校验结果作为确定性证据传给验证官，验证官在此基础上做事实性穷举验证。
+
 ---
 
 ## 文件结构
@@ -240,7 +254,8 @@ your-project/
 │   ├── CLAUDE.md            # 主对话规则 (角色调用, 累积感知, 行为约束)
 │   ├── settings.json        # 权限配置 + PreToolUse Hook 绑定
 │   ├── hooks/
-│   │   └── role-guard.sh    # 权限引擎 (基于 agent_type 匹配角色)
+│   │   ├── role-guard.sh    # 权限引擎 (基于 agent_type 匹配角色)
+│   │   └── doc-lint.sh      # 设计文档确定性校验 (调度器调用)
 │   ├── agents/              # 角色 prompt (subagent 独立加载, 不进主上下文)
 │   │   ├── 项目经理.md        # 需求分析, 系统设计, 5 个场景
 │   │   ├── 验证官.md         # 对抗性设计验证, verdict 三值

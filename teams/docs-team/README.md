@@ -65,6 +65,17 @@ cd your-project && claude
 - 删除/重组章节 → 检查所有内部链接有效性
 - 修改术语 → 全局统一更新
 
+### 确定性文档校验 (doc-lint)
+
+每次创建/修改文档后自动执行 `doc-lint.sh`，机械检查：
+
+- 内部链接有效性：`[text](path)` 指向的文件是否存在
+- 锚点匹配：`#anchor` 是否对应目标文件中的真实标题（支持中文标题）
+- 代码块语言标注：` ``` ` 后是否标注了语言
+- Sidebar 同步：新建文档是否出现在 VitePress sidebar 配置中
+
+检查到问题则立即修复，修复后重跑直到零警告。
+
 ### 直接执行，不走子进程
 
 与 dev-team 的 subagent 隔离模式不同，docs-team 的角色直接在主上下文中执行。一个对话中，一个专家，持续工作。
@@ -88,7 +99,9 @@ cd your-project && claude
 
 ### 权限约束
 
-Prompt 约束：command 中定义文件权限范围，禁止通过 Bash 写文件。settings.json deny 列表拦截破坏性操作。
+- **Prompt 约束**：command 中定义文件权限范围，禁止通过 Bash 写文件
+- **settings.json**：deny 列表拦截破坏性操作
+- **doc-lint.sh**：确定性校验兜底，不依赖 agent 注意力
 
 ---
 
@@ -109,6 +122,8 @@ your-project/
 ├── .claude/
 │   ├── CLAUDE.md            # 主对话规则（角色调用、行为约束）
 │   ├── settings.json        # 权限配置（破坏性操作拦截）
+│   ├── hooks/
+│   │   └── doc-lint.sh      # 文档确定性校验（链接/锚点/代码块/sidebar）
 │   └── commands/
 │       └── 编程专家.md       # 编程开发知识库专家（直接执行）
 ├── __ai__/
