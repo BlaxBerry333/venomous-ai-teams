@@ -17,6 +17,10 @@
 ## 快速开始
 
 ```bash
+# 推荐：交互式安装（支持多团队合并）
+bash setup.sh
+
+# 或手动复制（仅单团队使用时）
 cp -r teams/docs-team/.claude   your-project/
 cp -r teams/docs-team/__ai__    your-project/
 

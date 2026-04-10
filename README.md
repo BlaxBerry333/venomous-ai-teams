@@ -5,12 +5,12 @@
 ## 快速开始
 
 ```bash
-cp -r teams/dev-team/.claude   your-project/
-cp -r teams/dev-team/__ai__    your-project/
-
-cd your-project && claude
-# 输入: /角色命令 你的需求描述
+bash setup.sh
 ```
+
+交互式安装向导：选择团队 → 输入目标路径 → 自动合并。支持多团队同时安装，自动解决 hooks、settings.json、CLAUDE.md 的冲突。
+
+> 也可手动复制单个团队: `cp -r teams/dev-team/.claude your-project/ && cp -r teams/dev-team/__ai__ your-project/`
 
 ## 内置团队
 

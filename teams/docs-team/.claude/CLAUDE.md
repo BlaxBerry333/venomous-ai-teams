@@ -4,6 +4,7 @@
 
 本团队与其他团队（如 dev-team）完全独立，无任何文件或流程关联。
 
+<!-- VENOMOUS:docs-team:START -->
 # docs-team 规则
 
 ## 角色调用规则
@@ -44,3 +45,5 @@
 ```
 
 > 第一条调用 `/编程专家`，后续直接描述需求即可。
+
+<!-- VENOMOUS:docs-team:END -->
