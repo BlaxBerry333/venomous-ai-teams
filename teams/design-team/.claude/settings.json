@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": ["Bash", "Edit", "Write"],
+    "deny": [
+      "Bash(git push *)", "Bash(git push)",
+      "Bash(git commit *)", "Bash(git commit)",
+      "Bash(git reset --hard *)", "Bash(git reset --hard)",
+      "Bash(git checkout -- *)", "Bash(git checkout .)",
+      "Bash(git clean *)", "Bash(git rebase *)", "Bash(git merge *)",
+      "Bash(git branch -D *)", "Bash(git branch -d *)",
+      "Bash(git stash drop *)", "Bash(git tag -d *)",
+      "Bash(npm publish *)", "Bash(npm publish)",
+      "Bash(yarn publish *)", "Bash(yarn publish)",
+      "Bash(rm -rf *)", "Bash(rm -r *)", "Bash(rmdir *)",
+      "Bash(sed -i *)", "Bash(sed -i'' *)", "Bash(tee *)", "Bash(dd *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{"type": "command", "command": ".claude/hooks/role-guard.sh"}]
+      }
+    ]
+  }
+}

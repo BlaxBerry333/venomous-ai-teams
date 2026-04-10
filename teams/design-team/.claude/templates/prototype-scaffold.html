@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{页面名} — {项目名} 原型</title>
+  <style>
+    /* ========== Design Tokens ========== */
+    :root {
+      /* 从 design-tokens.css 复制，填入实际值 */
+    }
+
+    /* ========== Reset ========== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-family);
+      font-size: var(--font-size-base);
+      line-height: var(--line-height-normal);
+      color: var(--color-text);
+      background: var(--color-bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+    button { cursor: pointer; font: inherit; }
+
+    /* ========== Utilities ========== */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 var(--spacing-4); }
+    .visually-hidden {
+      position: absolute; width: 1px; height: 1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0);
+      white-space: nowrap; border: 0;
+    }
+
+    /* ========== Components ========== */
+    /* 在此添加组件样式 */
+
+    /* ========== Page-specific ========== */
+    /* 在此添加页面特定样式 */
+
+    /* ========== Responsive ========== */
+    @media (max-width: 1024px) {
+      /* lg breakpoint */
+    }
+    @media (max-width: 768px) {
+      /* md breakpoint */
+    }
+    @media (max-width: 640px) {
+      /* sm breakpoint */
+    }
+  </style>
+</head>
+<body>
+
+  <header role="banner">
+    <nav aria-label="主导航">
+      <div class="container">
+        <!-- 导航内容 -->
+      </div>
+    </nav>
+  </header>
+
+  <main role="main">
+    <div class="container">
+      <!-- 页面主体内容 -->
+    </div>
+  </main>
+
+  <footer role="contentinfo">
+    <div class="container">
+      <!-- 页脚内容 -->
+    </div>
+  </footer>
+
+  <!-- jQuery（仅在需要交互时取消注释） -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script> -->
+  <script>
+    // $(function() {
+    //   // 基础交互：tab 切换、模态框、手风琴、下拉菜单等
+    // });
+  </script>
+
+</body>
+</html>

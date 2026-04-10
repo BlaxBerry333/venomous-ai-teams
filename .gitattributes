@@ -1,0 +1,8 @@
+# GitHub language statistics: only count Shell
+# All other files are prompt templates, not source code
+
+teams/**/*.md linguist-documentation
+teams/**/*.css linguist-generated
+teams/**/*.html linguist-generated
+teams/**/*.json linguist-generated
+*.md linguist-documentation

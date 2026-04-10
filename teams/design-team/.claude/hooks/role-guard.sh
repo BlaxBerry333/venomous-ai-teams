@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# role-guard.sh — 角色权限引擎
+# role-guard.sh — 角色权限引擎（design-team）
 # PreToolUse hook: Edit|Write 调用前检查角色是否有权限修改目标文件
 # 兼容 bash 3.2+
 set -euo pipefail
@@ -21,12 +21,11 @@ fi
 # --- 权限规则（内嵌） ---
 get_rules() {
   case "$1" in
-    "项目经理")   echo "__ai__/dev-team/**" ;;
-    "验证官")     echo "__ai__/dev-team/tasks/*/design.md | __ai__/dev-team/tasks/*/dev-tasks.md" ;;
-    "程序员")     echo "__ai__/dev-team/tasks/*/dev-plan.md | __ai__/dev-team/tasks/*/dev-tasks.md | __ai__/dev-team/tasks/*/status.md | !__ai__/** | !.claude/**" ;;
-    "代码审查员") echo "__ai__/dev-team/tasks/*/review.md" ;;
-    "测试员")     echo "__ai__/dev-team/tasks/*/test-report.md | !__ai__/** | !.claude/**" ;;
-    *)            return 1 ;;
+    "产品设计师")   echo "__ai__/design-team/**" ;;
+    "设计验证官")   echo "__ai__/design-team/tasks/*/design-spec.md | __ai__/design-team/tasks/*/prototype-tasks.md" ;;
+    "UI设计师")     echo "__ai__/design-team/tasks/*/prototype-plan.md | __ai__/design-team/tasks/*/prototype-tasks.md | __ai__/design-team/tasks/*/status.md | __ai__/design-team/tasks/*/*.html | __ai__/design-team/tasks/*/assets/**" ;;
+    "设计审查员")   echo "__ai__/design-team/tasks/*/design-review.md" ;;
+    *)              return 1 ;;
   esac
 }
 
