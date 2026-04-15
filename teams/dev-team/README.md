@@ -63,6 +63,32 @@ cd your-project && claude
 3. 后续同从零开发的步骤 3-8
 ```
 
+### 追加需求 / 需求变更（任务进行中）
+
+开发过程中追加或变更需求，在原任务上继续，不新建任务目录：
+
+```
+任务 A 正在 developing/reviewing/testing...
+    │
+    ▼
+用户: /项目经理 再加个 X  (或 "改成 Y" / "这里不对")
+        → 调度器识别追加/修正词 + 当前未完成任务
+        → phase 退回 designing，TASKS.md 同步回退
+        → agent 按场景 3 在原 design.md/dev-tasks.md 上增量更新
+        → 变更记录写入 status.md 变更记录表
+        → 自动重走一轮 验证官 验证
+        → phase: verified（或 rework 最多 3 轮）
+    │
+    ▼
+继续原流程: /程序员 → /代码审查员 → ...
+```
+
+**触发词**（调度器识别，详见 `commands/项目经理.md` 步骤 1.2）：
+- 追加词：`再加 / 还要 / 补充 / 顺便 / 另外 / 加一个 / 加上`
+- 修正词：`改成 / 改为 / 不对 / 不是这样 / 应该是 / 有问题 / 重做 / 换成`
+- 指代词：`这个 / 刚才那个 / 上面那个 / 那个任务 / 现在这个`
+- 若想**新建**独立任务而非在原任务上改，用新开词：`新开 / 另起 / 单独做 / 新任务 / 新需求独立`
+
 ---
 
 ## 工作流程
@@ -160,7 +186,7 @@ cd your-project && claude
         init
          │
          ▼
-      designing ◀──── (验证 fail, 最多 3 轮)
+      designing ◀──── (验证官 fail, 最多 3 轮)
          │
          ▼
       verified
@@ -186,9 +212,22 @@ cd your-project && claude
   │    done ← 可合并                              │
   │                                              │
   └──────────────────────────────────────────────┘
+
+额外转移（P0-1 引入）：追加/修正需求
+  任何 { designing | verified | developing | dev-done |
+         reviewing | review-passed | testing | rework }
+     │
+     │  用户用 /项目经理 + 追加词/修正词/指代词 触发
+     │  调度器识别 → status.md 和 TASKS.md 退回 designing
+     ▼
+  designing  (重走验证官一轮，然后继续原流程)
 ```
 
-command 入口校验 phase，防止跳步骤。中间状态 (designing / developing / reviewing / testing) 允许重试。
+说明：
+- **验证官 rework**：`designing → designing`（fail 时验证官自动修正+循环，最多 3 轮）
+- **reviewer/tester rework**：`reviewing/testing → rework → developing`（rework_reason 记录来源，供程序员区分返工原因）
+- **需求变更**（P0-1）：任何未完成状态 → `designing`，原 phase 记录到 status.md 变更记录表；若原 phase 为 `rework`，调度器会同时清空 `rework_reason`（原返工原因已被新需求覆盖）
+- command 入口校验 phase，防止跳步骤。中间状态 (designing / developing / reviewing / testing) 允许重试
 
 ---
 
