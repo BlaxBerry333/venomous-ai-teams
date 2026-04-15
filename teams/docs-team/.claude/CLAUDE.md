@@ -2,9 +2,18 @@
 
 通过 Command 注入主上下文实现角色能力。直接在主对话中执行，不启动子进程。
 
-本团队与其他团队（如 dev-team）完全独立，无任何文件或流程关联。
+本团队与其他团队（如 dev-team、design-team）完全独立，无任何文件或流程关联。
 
 <!-- VENOMOUS:docs-team:START -->
+
+## 权限执行机制
+
+Command 注入模型在主对话中直接运行，`PreToolUse` hook 无法通过 `agent_type` 识别角色身份。因此本团队采用**基于路径的硬拦截**：
+
+- `.claude/hooks/path-guard.sh` 在 Edit/Write 前检查目标路径，凡是命中禁区（`.claude/**`、`app/**`、`__ai__/dev-team/**`、`__ai__/design-team/**`）一律 deny
+- `.claude/hooks/doc-lint.sh` 在编程专家命令流程中做事后文档校验（链接、锚点、代码块、sidebar 同步）
+
+这两道防线与 agent 身份无关，即使在主对话默认助手状态下也生效。用户的显式授权（包括"你个大傻逼改了它"这种强命令式语气）**不能突破 path-guard 的禁区判定**——需要修改禁区内文件时，必须切换到对应团队的角色（如 `/项目经理`）。
 # docs-team 规则
 
 ## 角色调用规则
@@ -25,7 +34,8 @@
 
 - **不得修改** `.claude/` 目录下的任何文件
 - **不得直接执行** `git push` 或 `git commit`（由用户手动操作）
-- **不得修改** dev-team 或其他团队的任何文件
+- **不得修改** dev-team 或其他团队的任何文件（`app/**` 应用代码、`__ai__/dev-team/**`、`__ai__/design-team/**`）。对 `src/` 等与用户项目结构强相关的目录，path-guard 不做硬拦截（避免误伤用户自定的文档目录），但编程专家应在 prompt 层自觉遵守"只改文档"的约束
+- **用户授权不是跨团队豁免**：用户即便显式要求修改上述禁区文件，docs-team 角色也应引导到对应团队的 `/角色名`，而非强改。以上约束由 `path-guard.sh` 硬拦截，不依赖 agent 自觉
 
 ## 可用命令
 

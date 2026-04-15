@@ -103,9 +103,12 @@ cd your-project && claude
 
 ### 权限约束
 
+- **path-guard.sh（PreToolUse 硬拦截）**：Edit/Write 前基于路径判断，禁区（`.claude/**`、`app/**`、`__ai__/dev-team/**`、`__ai__/design-team/**`）直接 deny，与 agent 身份无关
 - **Prompt 约束**：command 中定义文件权限范围，禁止通过 Bash 写文件
 - **settings.json**：deny 列表拦截破坏性操作
-- **doc-lint.sh**：确定性校验兜底，不依赖 agent 注意力
+- **doc-lint.sh**：确定性文档校验兜底，不依赖 agent 注意力
+
+> **为何不用 role-guard.sh**：docs-team 走 Command 注入模型（主对话直接执行），PreToolUse hook 拿不到 `agent_type`。dev-team/design-team 的 role-guard 基于角色身份，在此失效。改用基于路径的 path-guard 做硬拦截。
 
 ---
 
@@ -127,6 +130,7 @@ your-project/
 │   ├── CLAUDE.md            # 主对话规则（角色调用、行为约束）
 │   ├── settings.json        # 权限配置（破坏性操作拦截）
 │   ├── hooks/
+│   │   ├── path-guard.sh    # 路径禁区硬拦截（PreToolUse）
 │   │   └── doc-lint.sh      # 文档确定性校验（链接/锚点/代码块/sidebar）
 │   └── commands/
 │       └── 编程专家.md       # 编程开发知识库专家（直接执行）

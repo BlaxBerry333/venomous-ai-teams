@@ -272,7 +272,36 @@ DISPATCHER
   info "doc-lint.sh ${DIM}← dispatcher: ${DL_TEAMS}${RESET}"
 fi
 
-# --- 3c: 复制不冲突的 hooks ---
+# --- 3c: path-guard.sh (Command 注入模型 teams 使用) ---
+PG_TEAMS=""
+for team in $TEAMS; do
+  [ -f "$TEAMS_DIR/$team/.claude/hooks/path-guard.sh" ] && PG_TEAMS="$PG_TEAMS $team"
+done
+PG_TEAMS="${PG_TEAMS# }"
+
+PG_COUNT=0
+for t in $PG_TEAMS; do PG_COUNT=$((PG_COUNT + 1)); done
+
+if [ "$PG_COUNT" = "0" ]; then
+  :
+elif [ "$PG_COUNT" = "1" ]; then
+  for t in $PG_TEAMS; do
+    cp "$TEAMS_DIR/$t/.claude/hooks/path-guard.sh" "$TARGET_DIR/.claude/hooks/path-guard.sh"
+  done
+  chmod +x "$TARGET_DIR/.claude/hooks/path-guard.sh"
+  info "path-guard.sh ${DIM}← ${PG_TEAMS}${RESET}"
+else
+  # 多团队 path-guard 合并（目前仅 docs-team 一个 Command 注入 team，暂用第一个）
+  FIRST_PG_TEAM=""
+  for t in $PG_TEAMS; do
+    [ -z "$FIRST_PG_TEAM" ] && FIRST_PG_TEAM="$t"
+  done
+  cp "$TEAMS_DIR/$FIRST_PG_TEAM/.claude/hooks/path-guard.sh" "$TARGET_DIR/.claude/hooks/path-guard.sh"
+  chmod +x "$TARGET_DIR/.claude/hooks/path-guard.sh"
+  info "path-guard.sh ${DIM}← ${FIRST_PG_TEAM}${RESET} (多团队合并暂用第一个)"
+fi
+
+# --- 3d: 复制不冲突的 hooks ---
 for team in $TEAMS; do
   SRC="$TEAMS_DIR/$team/.claude/hooks"
   [ -d "$SRC" ] || continue
@@ -280,7 +309,7 @@ for team in $TEAMS; do
     [ -f "$f" ] || continue
     FNAME=$(basename "$f")
     case "$FNAME" in
-      role-guard.sh|doc-lint.sh) continue ;;
+      role-guard.sh|doc-lint.sh|path-guard.sh) continue ;;
     esac
     cp "$f" "$TARGET_DIR/.claude/hooks/$FNAME"
     info "$FNAME ${DIM}← ${team}${RESET}"
@@ -305,7 +334,14 @@ sort -u "$ALL_DENY_FILE" > "$DENY_UNIQUE_FILE"
 rm -f "$ALL_DENY_FILE"
 
 NEED_HOOK=0
-[ -n "$RG_TEAMS" ] && NEED_HOOK=1
+[ -n "${RG_TEAMS:-}" ] && NEED_HOOK=1
+[ -n "${PG_TEAMS:-}" ] && NEED_HOOK=1
+
+# 构造 hooks 数组（可能同时包含 role-guard 和 path-guard）
+HOOK_ENTRIES=""
+[ -n "${RG_TEAMS:-}" ] && HOOK_ENTRIES="$HOOK_ENTRIES role-guard"
+[ -n "${PG_TEAMS:-}" ] && HOOK_ENTRIES="$HOOK_ENTRIES path-guard"
+HOOK_ENTRIES="${HOOK_ENTRIES# }"
 
 {
   echo '{'
@@ -335,7 +371,13 @@ NEED_HOOK=0
     echo '    "PreToolUse": ['
     echo '      {'
     echo '        "matcher": "Edit|Write",'
-    echo '        "hooks": [{"type": "command", "command": ".claude/hooks/role-guard.sh"}]'
+    echo -n '        "hooks": ['
+    HFIRST=1
+    for h in $HOOK_ENTRIES; do
+      if [ "$HFIRST" = "1" ]; then HFIRST=0; else echo -n ", "; fi
+      echo -n "{\"type\": \"command\", \"command\": \".claude/hooks/${h}.sh\"}"
+    done
+    echo ']'
     echo '      }'
     echo '    ]'
     echo '  }'
