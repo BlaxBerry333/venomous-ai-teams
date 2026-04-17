@@ -53,7 +53,7 @@ match_glob() {
 deny_write() {
   local reason="$1"
   cat <<EOJSON
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"[docs-team 权限拦截] 禁止修改: ${FILE_PATH} — ${reason}。该路径属于其他团队或应用代码范围，docs-team 仅负责文档相关文件。如需修改，请切换到 /项目经理（dev-team）或 /产品设计师（design-team）。"}}
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"[docs-team 权限拦截] 禁止修改: ${FILE_PATH} — ${reason}。该路径属于其他团队或应用代码范围，docs-team 仅负责文档相关文件。如需修改，请切换到 /项目经理（dev-team）或 /设计师（design-team）。"}}
 EOJSON
   exit 0
 }
