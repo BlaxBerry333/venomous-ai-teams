@@ -84,6 +84,7 @@ cd your-project && claude
 ```
 
 **触发词**（调度器识别，详见 `commands/项目经理.md` 步骤 1.2）：
+
 - 追加词：`再加 / 还要 / 补充 / 顺便 / 另外 / 加一个 / 加上`
 - 修正词：`改成 / 改为 / 不对 / 不是这样 / 应该是 / 有问题 / 重做 / 换成`
 - 指代词：`这个 / 刚才那个 / 上面那个 / 那个任务 / 现在这个`
@@ -224,6 +225,7 @@ cd your-project && claude
 ```
 
 说明：
+
 - **验证官 rework**：`designing → designing`（fail 时验证官自动修正+循环，最多 3 轮）
 - **reviewer/tester rework**：`reviewing/testing → rework → developing`（rework_reason 记录来源，供程序员区分返工原因）
 - **需求变更**（P0-1）：任何未完成状态 → `designing`，原 phase 记录到 status.md 变更记录表；若原 phase 为 `rework`，调度器会同时清空 `rework_reason`（原返工原因已被新需求覆盖）

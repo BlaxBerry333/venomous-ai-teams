@@ -20,7 +20,7 @@
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
-        "hooks": [{"type": "command", "command": ".claude/hooks/role-guard.sh"}]
+        "hooks": [{"type": "command", "command": ".claude/hooks/path-guard.sh"}]
       }
     ]
   }

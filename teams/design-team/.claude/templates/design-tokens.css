@@ -1,90 +1,324 @@
-/* ========== Design Tokens ========== */
-/* 由产品设计师定义，UI设计师在原型中引用 */
-/* dev-team 开发时可直接导入此文件或提取 token 值 */
+/* ==========================================================================
+   Design Tokens — 参考脚手架（非强制规范）
+
+   这是一份专业设计系统 token 文件的**参考模板**（参考 Radix Colors / Material 3 /
+   Apple HIG / Tailwind / Shopify Polaris 的共识）。
+
+   ★ 使用方式 ★
+   - 用户项目没有现有设计系统 → 复制此模板，根据风格锚调整色阶值和 semantic 配对
+   - 用户项目已有设计系统（Tailwind / Material / 自研）→ 延续用户的体系，不要强套本模板
+   - 变量名、分层方式、色阶数量都不是固定的 → 根据项目实际需求调整
+   - 本模板的分层思路（primitive → semantic → motion/radius/shadow/focus）值得参考，
+     但具体命名和值必须根据用户的品牌和风格来定，不是照搬
+
+   核心分层（从下到上）：
+     1. Primitive Tokens — 色阶 / 尺寸基元。不直接用于业务代码
+     2. Semantic Tokens — 业务语义层。日常 prototype 代码只用这一层
+     3. (可选) Component Tokens — 组件级 token，本模板不提供，按需扩展
+
+   引用方式：
+   - 多文件 prototype 场景推荐 <link rel="stylesheet" href="design-tokens.css">
+   - 快速轻量原型可内联 :root {} 到 <style>（不是错误，只是注意一致性）
+   ========================================================================== */
 
 :root {
-  /* -- Colors: Primary -- */
-  --color-primary: ;
-  --color-primary-light: ;
-  --color-primary-dark: ;
+  /* ======================================================================
+     1. PRIMITIVE TOKENS — 色阶 / 尺寸基元
+     业务代码不直接使用这一层。 12 阶色阶参考 Radix Colors 语义（1 最浅、
+     12 最深；1-2 背景、3-5 低对比 UI、6-8 边框、9 纯色主色、10 hover、
+     11-12 文本）。
+     ====================================================================== */
 
-  /* -- Colors: Secondary -- */
-  --color-secondary: ;
-  --color-secondary-light: ;
-  --color-secondary-dark: ;
+  /* -- Gray 12 阶（中性色，浅色模式）-- */
+  --gray-1: #fcfcfc;   /* App background */
+  --gray-2: #f8f8f8;   /* Subtle background */
+  --gray-3: #f0f0f0;   /* UI element background */
+  --gray-4: #e8e8e8;   /* Hovered UI element background */
+  --gray-5: #e0e0e0;   /* Active / Selected UI element background */
+  --gray-6: #d0d0d0;   /* Subtle borders and separators */
+  --gray-7: #c0c0c0;   /* UI element border and focus rings */
+  --gray-8: #a8a8a8;   /* Hovered UI element border */
+  --gray-9: #808080;   /* Solid backgrounds */
+  --gray-10: #6a6a6a;  /* Hovered solid backgrounds */
+  --gray-11: #505050;  /* Low-contrast text */
+  --gray-12: #1a1a1a;  /* High-contrast text */
 
-  /* -- Colors: Neutral -- */
-  --color-bg: ;
-  --color-bg-secondary: ;
-  --color-surface: ;
-  --color-text: ;
-  --color-text-secondary: ;
-  --color-text-muted: ;
-  --color-border: ;
-  --color-border-light: ;
+  /* -- Blue 12 阶（主色 / 品牌）-- */
+  --blue-1: #fbfdff; --blue-2: #f4faff; --blue-3: #e6f4fe;
+  --blue-4: #d5efff; --blue-5: #c2e5ff; --blue-6: #acd8fc;
+  --blue-7: #8ec8f6; --blue-8: #5eb1ef; --blue-9: #0090ff;
+  --blue-10: #0588f0; --blue-11: #0b68cb; --blue-12: #113264;
 
-  /* -- Colors: Semantic -- */
-  --color-error: ;
-  --color-success: ;
-  --color-warning: ;
-  --color-info: ;
+  /* -- Green 12 阶（成功态）-- */
+  --green-1: #fbfefc; --green-2: #f2fcf5; --green-3: #e9f9ee;
+  --green-4: #ddf3e4; --green-5: #ccebd7; --green-6: #b4dfc4;
+  --green-7: #92ceac; --green-8: #5bb98c; --green-9: #30a46c;
+  --green-10: #2b9a66; --green-11: #218358; --green-12: #193b2d;
 
-  /* -- Typography -- */
-  --font-family: ;
-  --font-family-mono: ;
-  --font-size-xs: 0.75rem;    /* 12px */
-  --font-size-sm: 0.875rem;   /* 14px */
-  --font-size-base: 1rem;     /* 16px */
-  --font-size-lg: 1.125rem;   /* 18px */
-  --font-size-xl: 1.25rem;    /* 20px */
-  --font-size-2xl: 1.5rem;    /* 24px */
-  --font-size-3xl: 1.875rem;  /* 30px */
-  --line-height-tight: 1.25;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.75;
-  --font-weight-normal: 400;
+  /* -- Red 12 阶（错误态）-- */
+  --red-1: #fffcfc; --red-2: #fff7f7; --red-3: #feebec;
+  --red-4: #ffdbdc; --red-5: #ffcdce; --red-6: #fdbdbe;
+  --red-7: #f4a9aa; --red-8: #eb8e90; --red-9: #e5484d;
+  --red-10: #dc3e42; --red-11: #c62a2f; --red-12: #641723;
+
+  /* -- Amber 12 阶（警告态）-- */
+  --amber-1: #fefdfb; --amber-2: #fefbe9; --amber-3: #fff7c2;
+  --amber-4: #ffee9c; --amber-5: #fbe577; --amber-6: #f3d673;
+  --amber-7: #e9c368; --amber-8: #e2a336; --amber-9: #ffc53d;
+  --amber-10: #ffba18; --amber-11: #ab6400; --amber-12: #4f3422;
+
+  /* ======================================================================
+     2. SEMANTIC TOKENS — 业务语义层（★ 业务代码只用这一层 ★）
+     每个 surface 都预配一个 on-surface 文本色，保证 WCAG AA 对比度。
+     禁止在组件里临时搭配 `color: var(--gray-12); background: var(--gray-3);`，
+     应该直接用 semantic 配对 `color: var(--on-surface-subtle); background: var(--surface-subtle);`。
+     ====================================================================== */
+
+  /* -- Surface 与 On-Surface 配对 -- */
+  --surface-default: var(--gray-1);       /* 页面主背景 */
+  --on-surface-default: var(--gray-12);   /* 主背景上的正文 */
+  --on-surface-muted: var(--gray-11);     /* 主背景上的次要文本 */
+
+  --surface-subtle: var(--gray-2);        /* 轻度区分背景（卡片内嵌区域） */
+  --on-surface-subtle: var(--gray-12);
+
+  --surface-raised: var(--gray-1);        /* 浮起层（卡片）—— 靠 shadow 区分 */
+  --on-surface-raised: var(--gray-12);
+
+  --surface-emphasis: var(--gray-3);      /* 强调背景（hover 列表行） */
+  --on-surface-emphasis: var(--gray-12);
+
+  --surface-inverse: var(--gray-12);      /* 反色背景（深色提示卡） */
+  --on-surface-inverse: var(--gray-1);
+
+  /* -- Primary Action（主色，品牌 action）-- */
+  --color-primary: var(--blue-9);         /* 主按钮 / 链接 */
+  --color-primary-hover: var(--blue-10);
+  --color-primary-active: var(--blue-11);
+  --color-primary-subtle: var(--blue-3);  /* 主色浅背景（tag / highlight） */
+  --on-primary: #ffffff;                  /* 主色背景上的文本 */
+  --on-primary-subtle: var(--blue-11);    /* primary-subtle 背景上的文本 */
+
+  /* -- Semantic States（成功 / 错误 / 警告 / 信息） --
+     四件套：bg（浅背景）+ text（文本色）+ border（边框）+ solid（纯色） */
+  --color-success-bg: var(--green-3);
+  --color-success-text: var(--green-11);
+  --color-success-border: var(--green-7);
+  --color-success-solid: var(--green-9);
+
+  --color-error-bg: var(--red-3);
+  --color-error-text: var(--red-11);
+  --color-error-border: var(--red-7);
+  --color-error-solid: var(--red-9);
+
+  --color-warning-bg: var(--amber-3);
+  --color-warning-text: var(--amber-11);
+  --color-warning-border: var(--amber-7);
+  --color-warning-solid: var(--amber-9);
+
+  --color-info-bg: var(--blue-3);
+  --color-info-text: var(--blue-11);
+  --color-info-border: var(--blue-7);
+  --color-info-solid: var(--blue-9);
+
+  /* -- Border 分层 -- */
+  --border-subtle: var(--gray-6);         /* 分隔线 */
+  --border-default: var(--gray-7);        /* 常规边框（input / card） */
+  --border-strong: var(--gray-8);         /* 强调边框（hover input） */
+
+  /* ======================================================================
+     3. TYPOGRAPHY — font-size / line-height / letter-spacing 三件成组
+     每个排版级别是"三元组"（size + line + tracking），使用时必须一起用，
+     不可单独覆盖其中一项。font-weight 单独定义（在下方 --font-weight-*），
+     按场景搭配（标题用 semibold/bold，正文用 regular/medium）。
+     font-size 用 rem（基于 16px 根字号），line-height 用无单位比例值。
+     ====================================================================== */
+
+  --font-family-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* 字重 */
+  --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
 
-  /* -- Spacing (4px base) -- */
-  --spacing-1: 0.25rem;   /* 4px */
-  --spacing-2: 0.5rem;    /* 8px */
-  --spacing-3: 0.75rem;   /* 12px */
-  --spacing-4: 1rem;      /* 16px */
-  --spacing-5: 1.25rem;   /* 20px */
-  --spacing-6: 1.5rem;    /* 24px */
-  --spacing-8: 2rem;      /* 32px */
-  --spacing-10: 2.5rem;   /* 40px */
-  --spacing-12: 3rem;     /* 48px */
-  --spacing-16: 4rem;     /* 64px */
+  /* Caption（辅助文字：说明、标签） */
+  --text-caption-size: 0.75rem;           /* 12px */
+  --text-caption-line: 1.4;
+  --text-caption-tracking: 0.01em;
 
-  /* -- Border & Radius -- */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-full: 9999px;
-  --border-width: 1px;
+  /* Body Small（次要正文） */
+  --text-body-sm-size: 0.875rem;          /* 14px */
+  --text-body-sm-line: 1.5;
+  --text-body-sm-tracking: 0;
 
-  /* -- Shadows -- */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  /* Body（正文） */
+  --text-body-size: 1rem;                 /* 16px */
+  --text-body-line: 1.5;
+  --text-body-tracking: 0;
 
-  /* -- Breakpoints (reference, use in @media) -- */
-  /* sm: 640px, md: 768px, lg: 1024px, xl: 1280px */
+  /* Body Large（导读段落） */
+  --text-body-lg-size: 1.125rem;          /* 18px */
+  --text-body-lg-line: 1.55;
+  --text-body-lg-tracking: 0;
 
-  /* -- Transitions -- */
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 350ms ease;
+  /* Heading 四级（h4 / h3 / h2 / h1） */
+  --text-heading-sm-size: 1.125rem;       /* 18px, h4 */
+  --text-heading-sm-line: 1.4;
+  --text-heading-sm-tracking: -0.005em;
 
-  /* -- Z-index -- */
+  --text-heading-size: 1.375rem;          /* 22px, h3 */
+  --text-heading-line: 1.35;
+  --text-heading-tracking: -0.01em;
+
+  --text-heading-lg-size: 1.75rem;        /* 28px, h2 */
+  --text-heading-lg-line: 1.3;
+  --text-heading-lg-tracking: -0.015em;
+
+  --text-heading-xl-size: 2.25rem;        /* 36px, h1 */
+  --text-heading-xl-line: 1.2;
+  --text-heading-xl-tracking: -0.02em;
+
+  /* ======================================================================
+     4. SPACING — 4px 基底 + 几何节奏
+     禁止出现 13px / 17px / 25px 这种不在节奏上的值。
+     ====================================================================== */
+  --space-0-5: 0.125rem;  /* 2px */
+  --space-1:   0.25rem;   /* 4px */
+  --space-2:   0.5rem;    /* 8px */
+  --space-3:   0.75rem;   /* 12px */
+  --space-4:   1rem;      /* 16px */
+  --space-5:   1.25rem;   /* 20px — 次要节奏 */
+  --space-6:   1.5rem;    /* 24px */
+  --space-8:   2rem;      /* 32px */
+  --space-10:  2.5rem;    /* 40px — 次要节奏 */
+  --space-12:  3rem;      /* 48px */
+  --space-16:  4rem;      /* 64px */
+  --space-20:  5rem;      /* 80px */
+  --space-24:  6rem;      /* 96px */
+
+  /* ======================================================================
+     5. RADIUS — 分层语义（按使用场景，不是 sm/md/lg）
+     ====================================================================== */
+  --radius-none: 0;
+  --radius-xs: 2px;       /* Tag / Badge 小元素 */
+  --radius-sm: 4px;       /* Input / Button / 小 Card */
+  --radius-md: 8px;       /* Card / Panel */
+  --radius-lg: 12px;      /* Modal / 大 Card */
+  --radius-xl: 16px;      /* Hero Card / Feature Block */
+  --radius-pill: 9999px;  /* Pill Button / Avatar */
+
+  /* ======================================================================
+     6. SHADOW — 分层光学（双层合成：近处锐利 + 远处柔和）
+     单层阴影看起来"飘"，双层阴影更接近真实光学模型。
+     ====================================================================== */
+  --shadow-sm:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 1px 1px rgba(0, 0, 0, 0.03);
+
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.06),
+    0 2px 4px -1px rgba(0, 0, 0, 0.04);
+
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.08),
+    0 4px 6px -2px rgba(0, 0, 0, 0.04);
+
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.10),
+    0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+  --shadow-modal:
+    0 25px 50px -12px rgba(0, 0, 0, 0.18),
+    0 12px 20px -6px rgba(0, 0, 0, 0.08);
+
+  /* ======================================================================
+     7. FOCUS RING — a11y 一等公民
+     所有可聚焦元素 :focus-visible 必须用这一组 token，不要自己写 outline。
+     ====================================================================== */
+  --focus-ring-color: var(--blue-8);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --focus-ring: var(--focus-ring-width) solid var(--focus-ring-color);
+
+  /* ======================================================================
+     8. MOTION — easing 是设计决策，不是万能"ease"
+     ease-out 感知"快速开始 → 柔和停止"，适合进入动画（元素出现 / 展开）
+     ease-in 感知"柔和启动 → 快速离开"，适合退出动画（元素消失 / 折叠）
+     ease-in-out 用于对称动画（位移、颜色过渡）
+     ====================================================================== */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.5, 1.5, 0.5, 1);  /* 弹性反馈（可选） */
+
+  --duration-instant: 75ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+
+  /* ======================================================================
+     9. Z-INDEX — 分层语义
+     ====================================================================== */
+  --z-base: 0;
   --z-dropdown: 100;
   --z-sticky: 200;
-  --z-modal-backdrop: 300;
+  --z-overlay: 300;       /* 半透明遮罩 */
   --z-modal: 400;
-  --z-tooltip: 500;
+  --z-popover: 500;
+  --z-toast: 600;
+  --z-tooltip: 700;
+}
+
+/* ==========================================================================
+   DARK MODE — first-class，不是事后套
+   启用方式二选一：
+     <html class="dark">  或  <html data-theme="dark">
+   仅覆盖"感知层"（Gray 12 阶 + Surface + 部分 Border），其余 semantic 自动继承。
+   ========================================================================== */
+:root.dark,
+:root[data-theme="dark"] {
+  /* Gray 12 阶（暗色模式，1 最深、12 最浅） */
+  --gray-1: #111111;
+  --gray-2: #181818;
+  --gray-3: #222222;
+  --gray-4: #2a2a2a;
+  --gray-5: #313131;
+  --gray-6: #3a3a3a;
+  --gray-7: #484848;
+  --gray-8: #606060;
+  --gray-9: #6e6e6e;
+  --gray-10: #7b7b7b;
+  --gray-11: #b4b4b4;
+  --gray-12: #eeeeee;
+
+  /* Shadow 在暗色下视觉权重需更强 */
+  --shadow-sm:
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 1px 1px rgba(0, 0, 0, 0.25);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.45),
+    0 2px 4px -1px rgba(0, 0, 0, 0.30);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.50),
+    0 4px 6px -2px rgba(0, 0, 0, 0.30);
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.55),
+    0 8px 10px -6px rgba(0, 0, 0, 0.30);
+  --shadow-modal:
+    0 25px 50px -12px rgba(0, 0, 0, 0.70),
+    0 12px 20px -6px rgba(0, 0, 0, 0.40);
+}
+
+/* ==========================================================================
+   REDUCED MOTION — 尊重用户 OS 偏好（a11y）
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0.01ms;
+    --duration-fast: 0.01ms;
+    --duration-normal: 0.01ms;
+    --duration-slow: 0.01ms;
+  }
 }

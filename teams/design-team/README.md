@@ -1,18 +1,18 @@
-# design-team — 设计流程团队
+# design-team — 设计团队（单角色 + 可选独立审查）
 
-4 个角色驱动的完整设计流程。每个角色在独立 subagent 上下文中运行，互不干扰，通过文件通信。
+直接在主上下文中执行的设计师角色。调用一次命令后角色能力在当前对话中持续生效。
+
+可选的独立审查 SubAgent 仅在用户主动要求"严格审查"时由 `/设计师` 自动调度。
 
 ---
 
 ## 角色与命令
 
-| 命令          | 角色                         | 核心职责                                                                    |
-| ------------- | ---------------------------- | --------------------------------------------------------------------------- |
-| `/产品设计师` | 资深产品设计师 + 设计验证官  | 需求分析、设计方向与风格引导、信息架构、用户流程、设计规格、设计令牌、对抗性设计验证(最多 3 轮) |
-| `/UI设计师`   | Staff UI/UX Engineer (15年+) | HTML+CSS 原型制作（线框图 → 高保真）、响应式、语义化、ARIA                  |
-| `/设计审查员` | Principal Design QA (15年+)  | 五维审查：规格合规 + 视觉一致性 + 响应式 + 可访问性 + 可用性                |
+| 命令 | 角色 | 核心职责 |
+|------|------|---------|
+| `/设计师` | 资深产品设计师 + UI/UX 工程师 + 设计系统架构师 | 设计现状摸底 / 新设计任务 / 迭代修改 / 调度独立审查 |
 
-设计验证官为内部角色，由 `/产品设计师` 自动调度，无需单独调用。
+> 设计审查 SubAgent 不直接暴露给用户，由 `/设计师` 在用户喊「严格审查 / 独立审一下 / 找毛病」时按需 spawn。
 
 ---
 
@@ -27,204 +27,131 @@ cp -r teams/design-team/.claude   your-project/
 cp -r teams/design-team/__ai__    your-project/
 
 cd your-project && claude
-# 输入: /角色命令 你的设计需求
+# 输入: /设计师 你的设计需求
 ```
 
-### 从零设计
+### 典型用法
 
 ```
-1. /产品设计师 描述设计需求
-        → 设计规格+设计令牌+对抗性验证
-        → phase: spec-done
-2. /UI设计师
-        → 线框图 + 高保真 HTML+CSS 原型
-        → phase: prototype-done
-3. /设计审查员
-        → 五维设计审查
-        → phase: done (或 rework)
-4. /UI设计师
-        → 修复审查问题 (如有 rework)
-5. /设计审查员
-        → 复审
-6. 浏览器打开 mockup.html 查看最终设计
+/设计师 设计 B 端 SaaS 项目管理 console 主页
+        → 前置问答（按任务规模分档：3/4/7 项）
+        → 写 design-brief.md + design-tokens.css + prototype.html
+        → 跑 design-lint + 设计自检
+        → 登记 TASKS.md
+
+颜色再亮一点                           ← P4：修正词，定位现有任务迭代
+把侧边栏换成可折叠的                    ← 同上
+新开一个登录页设计                     ← P2：新开词，新建任务目录
+严格审查一下                          ← P1：spawn 独立审查 SubAgent
 ```
 
-### 交接给 dev-team
+### 追加需求 / 迭代修改
+
+开发过程中追加或修改需求，在原任务上继续，不新建目录：
 
 ```
-设计完成后，dev-team 开发时可参考：
-- __ai__/design-team/tasks/{任务}/mockup.html     — 视觉原型
-- __ai__/design-team/tasks/{任务}/design-tokens.css — 设计令牌
-- __ai__/design-team/tasks/{任务}/design-spec.md    — 设计规格
+/设计师 设计登录页              ← 新建任务
+颜色再亮一点                    ← 修正词 → P4，定位刚才的任务，改 tokens
+按钮改成幽灵                    ← 同上
+加一个空状态                    ← 追加词 → P4，同上
 ```
+
+**触发词**（场景判定识别，详见 `commands/设计师.md`）：
+- 追加词：`再加` `还要` `补充` `顺便` `另外` `加一个`
+- 修正词：`改成` `改为` `不对` `应该是` `有问题` `重做` `换成` `亮一点` `深一点`
+- 指代词：`这个` `刚才那个` `那个任务` `上次的`
+- 新开词：`新开` `另起` `单独做` `新任务` `新的页面`
+
+**新会话保护**：新对话中 `/设计师` 仍会读 `TASKS.md` 找未完成任务作候选，根据触发词正确归属。
 
 ---
 
-## 工作流程
+## 核心特性
 
-```
-用户: /产品设计师 设计需求
-    │
-    ▼
-┌── /产品设计师 ─────────────────────────────────────────┐
-│                                                       │
-│   产品设计师 agent                                      │
-│   ├ 分析现有代码/样式 (不信文档)                          │
-│   ├ 设计方向与风格参考 (用户关键词/参考/排除)              │
-│   ├ 信息架构 + 用户流程 + 组件状态矩阵                     │
-│   └ 输出 design-spec.md + design-tokens.css            │
-│       + prototype-tasks.md                            │
-│       │                                              │
-│   调度器 design-lint 确定性校验                          │
-│       │                                              │
-│       └──> 设计验证官 agent (附 lint 结果)              │
-│            ├ 对抗性审查: 用户流程缺口 + 状态矩阵           │
-│            │   + 响应式盲点 + 可访问性                    │
-│            ├ 直接修补                                  │
-│       <── fail 自动循环 (最多 3 轮) <──                 │
-│            └ verdict: pass / fail                     │
-│                                                      │
-└──────────────────── phase: spec-done ────────────────┘
-    │
-    ▼
-┌── /UI设计师 ──────────────────────────────────────────┐
-│                                                      │
-│   UI设计师 agent                                      │
-│   ├ 设计交叉验证                                       │
-│   ├ 阶段 1: wireframe.html (低保真线框图)               │
-│   ├ 阶段 2: mockup.html (高保真 + 交互)                │
-│   │   ├ 设计令牌 100% 应用                              │
-│   │   ├ 3 断点响应式                                    │
-│   │   ├ 语义化 HTML + ARIA                             │
-│   │   └ jQuery 基础交互                                 │
-│   └ 自检 6 项 + 交付核查                                 │
-│                                                      │
-└──────────────────── phase: prototype-done ───────────┘
-    │
-    ▼
-┌── /设计审查员 ────────────────────────────────────────┐
-│                                                     │
-│   设计审查员 agent                                    │
-│   ├ 1. 设计规格合规性                                  │
-│   ├ 2. 视觉一致性 (设计令牌 + 硬编码检测)                │
-│   ├ 3. 响应式质量 (断点 + 触摸目标)                      │
-│   ├ 4. 可访问性 (ARIA + 焦点 + 对比度)                   │
-│   └ 5. 可用性启发式 (Nielsen 十原则)                     │
-│                                                     │
-│   只有 pass   -> done                                 │
-│   有 rework   -> /UI设计师                             │
-│                                                     │
-└──────────────────── phase: done ────────────────────┘
-    │
-    ▼
-浏览器打开 mockup.html 查看最终设计
-dev-team 可参考 __ai__/design-team/tasks/{任务}/
-```
+### 设计前置问答（按任务规模分档）
 
-### 「谁审谁」
+不一刀切全问。按任务规模走不同通道：
 
-```
-产品设计师  -->  设计验证官    独立上下文对抗性审查, 最多 3 轮自动循环
-UI设计师    -->  设计审查员    独立上下文五维设计审查
-```
+- **快速通道**（组件改动 / 样式微调）：3 项
+- **标准通道**（tokens / 设计规范 / 组件库）：4 项
+- **完整通道**（完整页面 / 落地页 / Dashboard）：7 项
 
----
+**底线**：至少有一个风格锚点（参考网址 / 风格关键词 / 具体值 / 截图），没有不动手。
 
-## 状态机
+### 反 AI 烂设计清单（13 项）
 
-```
-        init
-         │
-         ▼
-     researching ◀──── (验证 fail, 最多 3 轮)
-         │
-         ▼
-      spec-done
-         │
-         ▼
-  ┌─▶ prototyping
-  │      │
-  │      ▼
-  │  prototype-done
-  │      │
-  │      ▼
-  │   reviewing ──── (有 rework) ──▶ rework ─┐
-  │      │                                   │
-  │      ▼ (pass)                            │
-  │    done ← 可交付                          │
-  │                                          │
-  └──────────────────────────────────────────┘
-```
+prompt 内置 13 项 AI 默认陷阱（视觉 10 项 + Token 体系 3 项），出原型前自检命中即重做。`design-lint.sh` 也机械检测部分信号。
 
-command 入口校验 phase，防止跳步骤。中间状态 (researching / prototyping / reviewing) 允许重试。
+### 设计系统 tokens（技术体系适配）
+
+`templates/design-tokens.css` 是参考脚手架（Radix 风格分层），不是强制模板：
+
+- 用户已有 Tailwind / Material / 自研体系 → 延续用户体系
+- 用户没有设计体系 → 参考模板分层思路创建
+
+Tailwind 项目直接引入 CDN 用 utility class 写原型。
+
+### 确定性原型校验（design-lint）
+
+`/设计师` 完成原型后自动跑 `design-lint.sh`（13 项机械检查：硬编码检测、响应式断点、语义 HTML、ARIA、Typography 成对、反 AI 信号等）。`[WARN]` 当轮修完。
+
+### 可选独立审查
+
+用户喊「严格审查」→ spawn `设计审查` SubAgent，干净 context 独立审 7 维（规格合规 / 风格锚一致性 / Token 体系合规 / 视觉一致 / 响应式 / 可访问性 / Nielsen 启发式）。
+
+### 上下文质量保障
+
+- **产出写文件，对话只输出摘要**
+- **操作前重读，不凭记忆**
+- **跨任务建议 `/compact`** — `/设计师` < 7000 tokens，compact 后自动重新附加
 
 ---
 
 ## 权限系统
 
-### 角色权限矩阵
+### 路径硬拦截（path-guard）
 
-| 文件                     | 产品设计师 | 设计验证官 | UI设计师 | 设计审查员 |
-| ------------------------ | :--------: | :--------: | :------: | :--------: |
-| `design-spec.md`         |     ✏️     |     ✏️     |    👁️    |     👁️     |
-| `design-tokens.css`      |     ✏️     |     👁️     |    👁️    |     👁️     |
-| `prototype-tasks.md`     |     ✏️     |     ✏️     |    ☑️    |     👁️     |
-| `prototype-plan.md`      |     🚫     |     🚫     |    ✏️    |     👁️     |
-| `*.html / assets/**`     |     🚫     |     🚫     |    ✏️    |     👁️     |
-| `design-review.md`       |     🚫     |     🚫     |    👁️    |     ✏️     |
-| `status.md`              |     ✏️     |     🚫     |    ✏️    |     🚫     |
-| `index.md / conventions` |     ✏️     |     🚫     |    🚫    |     🚫     |
-| `.claude/**`             |     🚫     |     🚫     |    🚫    |     🚫     |
+`PreToolUse` hook 基于路径判断，与 agent 身份无关。禁区：
 
-> ✏️ 可写 · ☑️ 仅勾选 checkbox · 👁️ 只读 · 🚫 禁止
+- `.claude/**` — 框架配置
+- `app/**` — 应用代码（dev-team 负责）
+- `__ai__/dev-team/**` — dev-team 领地
+- `__ai__/docs-team/**` — docs-team 领地
 
-### 三层防线
+**用户授权不是跨团队豁免**：hook 仍 deny。需修改请切换到对应团队角色。
 
-1. **Hook 拦截** (role-guard.sh) : 基于 `agent_type` 自动拦截越权 Edit/Write
-2. **Prompt 约束** : agent prompt 禁止通过 Bash 写文件
-3. **事后验证** : 调度器在 agent 返回后执行 git diff 检查变更范围
+### 文件权限矩阵
 
-### 确定性文档校验 (design-lint)
+| 文件 | 设计师 |
+|------|:------:|
+| `__ai__/design-team/**` | ✏️ |
+| 用户项目代码 | 🚫 |
+| `.claude/**` | 🚫 |
+| 其他团队 `__ai__/` | 🚫 |
 
-调度器在 spawn 设计验证官之前自动执行 `design-lint.sh`：
+> ✏️ 可写 · 🚫 禁止
 
-- HTML 引用检查：prototype-tasks.md 中引用的 HTML 文件是否存在
-- 硬编码颜色检测：HTML 原型中是否有未使用 CSS custom properties 的颜色值
-- 响应式断点检查：HTML 原型中 @media 断点是否不足 2 个
-- 语义化 HTML 检查：是否缺少 `<main>`、`<nav>`、`role=` 属性
-- 关键章节检查：design-spec.md 是否包含设计方向、用户流程、响应式、令牌、可访问性章节
-
-校验结果作为确定性证据传给设计验证官，验证官在此基础上做事实性穷举验证。
+> **为何不用 role-guard.sh**：Command 注入模型在主对话执行，hook 拿不到 `agent_type`。改用基于路径的 path-guard 硬拦截，与 docs-team 同模式。
 
 ---
 
-## 原型输出
-
-### 特点
-
-- **单文件自包含**：内联 CSS + 可选 jQuery CDN，双击浏览器即开
-- **设计令牌驱动**：所有视觉值用 CSS Custom Properties (`var(--color-primary)`)
-- **3 断点响应式**：640px / 768px / 1024px
-- **语义化 HTML5** + ARIA 可访问性属性
-- **基础交互**：jQuery（tab 切换、模态框、手风琴、下拉菜单）
+## 文件结构
 
 ### 产出目录
 
 ```
 __ai__/design-team/
-├── index.md                    # 项目设计总览 (产品设计师首次运行生成)
-├── conventions.md              # 设计规范 (产品设计师从代码提取)
+├── index.md                        # 项目设计总览（场景一生成）
+├── conventions.md                  # 设计规范（从代码归纳）
 └── tasks/
-    ├── TASKS.md                # 任务索引 (调度器统一更新)
+    ├── TASKS.md                    # 任务索引（场景判定时查询用）
     └── YYYYMMDD_功能名_描述/
-        ├── design-spec.md      # 设计规格     - 产品设计师写, 验证官可修正
-        ├── design-tokens.css   # 设计令牌     - 产品设计师写
-        ├── prototype-tasks.md  # 原型任务清单  - 产品设计师写, UI设计师勾选
-        ├── prototype-plan.md   # 原型制作计划  - UI设计师写
-        ├── wireframe.html      # 低保真线框图  - UI设计师写
-        ├── mockup.html         # 高保真原型    - UI设计师写
-        ├── design-review.md    # 审查记录     - 设计审查员写
-        └── status.md           # 任务状态     - 调度器更新 phase
+        ├── design-brief.md         # 设计简报
+        ├── design-tokens.css       # 设计令牌（dev-team 接口）
+        ├── prototype.html          # HTML+CSS 原型
+        ├── status.md               # 任务状态 + 变更记录
+        ├── static/                 # （可选）参考资源
+        └── design-review.md        # （可选）独立审查报告
 ```
 
 ### 安装后的用户项目
@@ -232,48 +159,35 @@ __ai__/design-team/
 ```
 your-project/
 ├── .claude/
-│   ├── CLAUDE.md               # 主对话规则
-│   ├── settings.json           # 权限配置 + PreToolUse Hook
+│   ├── CLAUDE.md                       # 主对话规则
+│   ├── settings.json                   # 权限配置 + hook 绑定
 │   ├── hooks/
-│   │   ├── role-guard.sh       # 权限引擎
-│   │   └── design-lint.sh      # 设计文档确定性校验
-│   ├── agents/
-│   │   ├── 产品设计师.md         # 需求分析, 设计规格, 4 个场景
-│   │   ├── 设计验证官.md         # 对抗性设计验证, verdict 三值
-│   │   ├── UI设计师.md          # HTML+CSS 原型制作, 自检 6 项
-│   │   └── 设计审查员.md         # 五维审查
+│   │   ├── path-guard.sh               # 路径禁区硬拦截（PreToolUse）
+│   │   └── design-lint.sh              # 原型确定性校验（13 项）
 │   ├── commands/
-│   │   ├── 产品设计师.md         # 编排设计 + 验证循环
-│   │   ├── UI设计师.md          # 编排原型制作 + 产物校验
-│   │   └── 设计审查员.md         # 编排审查 + 严重度分级
+│   │   └── 设计师.md                    # 设计师角色（主对话直接执行）
+│   ├── agents/
+│   │   └── 设计审查.md                  # 可选独立审查 SubAgent
 │   └── templates/
-│       ├── design-spec.md       # 设计规格模板 (含验证章节)
-│       ├── prototype-tasks.md   # 原型任务清单模板
-│       ├── prototype-plan.md    # 原型制作计划模板
-│       ├── design-tokens.css    # 设计令牌模板
-│       ├── prototype-scaffold.html  # HTML 原型脚手架
-│       ├── design-review.md     # 审查记录模板
-│       ├── status.md            # 状态 frontmatter 模板
-│       └── tasks.md             # 任务索引模板
-├── __ai__/
-│   └── design-team/
-│       └── .gitkeep
-└── (用户代码...)
+│       ├── design-brief.md             # 设计简报模板
+│       ├── design-tokens.css           # 设计令牌参考脚手架
+│       ├── prototype-scaffold.html     # HTML 原型脚手架
+│       ├── status.md                   # 任务状态模板
+│       └── TASKS.md                    # 任务索引模板
+└── __ai__/
+    └── design-team/
+        └── .gitkeep
 ```
 
 ---
 
 ## 与 dev-team 的协作
 
-design-team 与 dev-team 完全独立，零耦合。协作通过文件引用：
+design-team 与 dev-team 完全独立。协作通过文件引用：
 
-1. design-team 完成设计后，产出在 `__ai__/design-team/tasks/{任务}/`
-2. dev-team 的 `/项目经理` 在 design.md 中引用：
-   ```
-   参考设计原型：__ai__/design-team/tasks/YYYYMMDD_功能名/mockup.html
-   参考设计令牌：__ai__/design-team/tasks/YYYYMMDD_功能名/design-tokens.css
-   ```
-3. 两个团队的 role-guard.sh 各自独立，互不允许写对方目录
+1. design-team 产出在 `__ai__/design-team/tasks/{任务}/`
+2. dev-team 的 `/项目经理` 在 design.md 中引用 prototype.html / design-tokens.css / design-brief.md
+3. 两个团队的 hook 各自独立，互不允许写对方目录
 
 ---
 
@@ -281,17 +195,12 @@ design-team 与 dev-team 完全独立，零耦合。协作通过文件引用：
 
 ### 模型
 
-各角色默认继承用户当前模型 (inherit)。如需指定，编辑 `.claude/agents/<角色>.md` 的 frontmatter:
+`/设计师` 是 command（主对话执行），继承用户当前模型。设计工作不涉及复杂多 agent 调度或深度代码推理，**Sonnet 即可胜任**，无需 Opus。
 
-```yaml
----
-name: UI设计师
-description: ...
-model: sonnet
-tools: ...
----
-```
+`设计审查` SubAgent 已在 frontmatter 中固定 `model: sonnet`，无论用户主对话用什么模型，审查都跑 Sonnet。
 
 ### 语言
 
-当前版本为中文。角色会按 CLAUDE.md 中的语言与用户交互。
+- 与用户对话：按用户使用的语言
+- 文档正文：按现有项目文档风格
+- 代码 / token 名 / CSS 属性：英文
