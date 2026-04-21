@@ -13,7 +13,8 @@
       "Bash(npm publish *)", "Bash(npm publish)",
       "Bash(yarn publish *)", "Bash(yarn publish)",
       "Bash(rm -rf *)", "Bash(rm -r *)", "Bash(rmdir *)",
-      "Bash(sed -i *)", "Bash(sed -i'' *)", "Bash(tee *)", "Bash(dd *)"
+      "Bash(sed -i *)", "Bash(sed -i'' *)", "Bash(tee *)", "Bash(dd *)",
+      "Bash(bash *setup.sh*)", "Bash(sh *setup.sh*)", "Bash(./*setup.sh*)"
     ]
   },
   "hooks": {

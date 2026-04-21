@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
 # path-guard.sh — 路径禁区守卫（docs-team）
-# PreToolUse hook: Edit|Write 前检查目标路径是否落在 docs-team 禁区
-#
-# 设计说明：
-# docs-team 走 Command 注入模型，hook 拿不到 agent_type（主对话执行，非子进程）。
-# dev-team/design-team 的 role-guard.sh 依赖 agent_type 做角色白名单，在此不可用。
-# 本 hook 改为"基于路径的 denylist"：不问谁在改，只看改的路径是不是其他团队的领地
-# 或明显属于 dev-team 代码/配置范围。命中即拒绝。
+# PreToolUse hook: Edit|Write 前基于路径硬拦截，与角色身份无关。
+# 命中 DENY_RULES 即返回 deny JSON，否则放行。
 #
 # 兼容 bash 3.2+
 set -euo pipefail
@@ -16,16 +11,49 @@ INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // ""' 2>/dev/null || echo "")
 [ -z "$FILE_PATH" ] && exit 0
 
-# 转为相对路径（相对于 cwd）
+# --- 控制字符先拒（防换行/Tab 让 grep 按行匹配漏掉 deny）---
+case "$FILE_PATH" in
+  *$'\n'*|*$'\r'*|*$'\t'*) cat <<'EOJSON'
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"[docs-team 权限拦截] 路径含控制字符（换行/Tab 等），禁止。请用规范文件名。"}}
+EOJSON
+    exit 0 ;;
+esac
+
+# --- 绝对路径：先归一化 cwd（去尾斜杠 + 合并 //），剥不掉前缀 → deny（项目外） ---
 if [ "${FILE_PATH#/}" != "$FILE_PATH" ]; then
   CWD=$(echo "$INPUT" | jq -r '.cwd // ""' 2>/dev/null || pwd)
-  FILE_PATH="${FILE_PATH#"$CWD"/}"
+  [ -z "$CWD" ] && CWD="${PWD:-/}"
+  CWD="${CWD%/}"
+  while [ "${CWD#*//}" != "$CWD" ]; do CWD="${CWD%%//*}/${CWD#*//}"; done
+  while [ "${FILE_PATH#*//}" != "$FILE_PATH" ]; do
+    FILE_PATH="${FILE_PATH%%//*}/${FILE_PATH#*//}"
+  done
+  STRIPPED="${FILE_PATH#"$CWD"/}"
+  if [ "$STRIPPED" = "$FILE_PATH" ] && [ "$FILE_PATH" != "$CWD" ]; then
+    cat <<'EOJSON'
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"[docs-team 权限拦截] 绝对路径在项目外，禁止跨项目修改。请用相对路径或当前项目内的绝对路径。"}}
+EOJSON
+    exit 0
+  fi
+  FILE_PATH="$STRIPPED"
 fi
 
+# --- 相对路径规范化：去 ./、合并 //、拒 ../ ---
+while [ "${FILE_PATH#./}" != "$FILE_PATH" ]; do FILE_PATH="${FILE_PATH#./}"; done
+while [ "${FILE_PATH#*//}" != "$FILE_PATH" ]; do
+  FILE_PATH="${FILE_PATH%%//*}/${FILE_PATH#*//}"
+done
+# 归一化后空串（如传入 "./" 或 "/"）放行——写入空路径本来就会在 OS 层失败
+[ -z "$FILE_PATH" ] && exit 0
+case "/$FILE_PATH/" in
+  */../*) cat <<'EOJSON'
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"[docs-team 权限拦截] 路径含 ../，禁止 traversal。请用规范的相对路径或绝对路径。"}}
+EOJSON
+    exit 0 ;;
+esac
+
 # --- 禁区规则（denylist）---
-# 只挡明确属于其他团队的路径。不写 src/** 等用户项目结构差异大的路径，
-# 避免误伤（不同项目 src/ 下放什么天差地别，应由用户在 conventions.md 约定，
-# 而非框架层硬编码）。
+# src/** 不硬拦（不同项目含义差异大，由用户在 conventions.md 约定范围）。
 DENY_RULES=$(cat <<'EOF'
 .claude/**
 __ai__/dev-team/**
@@ -50,10 +78,31 @@ match_glob() {
   echo "$1" | grep -qE "$regex"
 }
 
+# JSON 字符串转义：\ 和 " 必须转义。控制字符 \t \r 作为 defense-in-depth
+# 也转义（正常情况下前面的 case 已拒绝，但留着防未来 case 被误改）。
+json_escape() {
+  printf '%s' "$1" | awk '
+    BEGIN { ORS="" }
+    {
+      n = length($0)
+      for (i = 1; i <= n; i++) {
+        c = substr($0, i, 1)
+        if (c == "\\") printf "\\\\"
+        else if (c == "\"") printf "\\\""
+        else if (c == "\t") printf "\\t"
+        else if (c == "\r") printf "\\r"
+        else printf "%s", c
+      }
+    }
+  '
+}
+
 deny_write() {
   local reason="$1"
+  local esc_path
+  esc_path=$(json_escape "$FILE_PATH")
   cat <<EOJSON
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"[docs-team 权限拦截] 禁止修改: ${FILE_PATH} — ${reason}。该路径属于其他团队或应用代码范围，docs-team 仅负责文档相关文件。如需修改，请切换到 /项目经理（dev-team）或 /设计师（design-team）。"}}
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"[docs-team 权限拦截] 禁止修改: ${esc_path} — ${reason}。当前项目装的是 docs-team，主要负责 __ai__/docs-team/ 下的产出与用户自定的文档目录（由 conventions.md 约定，path-guard 不做白名单）。如需修改其他范围：请告知用户「这需要切换 team，请你到 venomous-ai-teams 仓库根目录跑 bash setup.sh 选对应 team；如已删仓库需先重新 git clone」。Claude 不要自己跑 setup.sh（交互式脚本），也不要变通改其他路径。"}}
 EOJSON
   exit 0
 }
@@ -63,11 +112,11 @@ while IFS= read -r rule; do
   [ -z "$rule" ] && continue
   if match_glob "$FILE_PATH" "$rule"; then
     case "$rule" in
-      ".claude/"*)            deny_write "框架配置目录" ;;
-      "__ai__/dev-team/"*)    deny_write "dev-team 领地" ;;
-      "__ai__/design-team/"*) deny_write "design-team 领地" ;;
-      "app/"*)                deny_write "应用代码目录（dev-team 负责）" ;;
-      *)                      deny_write "docs-team 禁区" ;;
+      ".claude/"*)             deny_write "框架配置目录" ;;
+      "__ai__/dev-team/"*)     deny_write "dev-team 领地" ;;
+      "__ai__/design-team/"*)  deny_write "design-team 领地" ;;
+      "app/"*)                 deny_write "应用代码目录" ;;
+      *)                       deny_write "docs-team 禁区" ;;
     esac
   fi
 done <<< "$DENY_RULES"

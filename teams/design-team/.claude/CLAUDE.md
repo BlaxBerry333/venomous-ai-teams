@@ -6,18 +6,12 @@
 
 可选的独立审查 SubAgent（`/设计师` 内部按需调度），仅在用户主动喊「严格审查 / 找毛病」时触发。
 
-本团队与其他团队（dev-team、docs-team）完全独立，无任何文件或流程关联。
-
-<!-- VENOMOUS:design-team:START -->
-
 ## 权限执行机制
 
-Command 注入模型在主对话中直接运行，`PreToolUse` hook 无法通过 `agent_type` 识别角色身份。因此本团队采用**基于路径的硬拦截**：
+- `.claude/hooks/path-guard.sh` 在 Edit/Write 前检查目标路径，命中禁区（`.claude/**`、`app/**`、`__ai__/dev-team/**`、`__ai__/docs-team/**`）一律 deny
+- `.claude/hooks/design-lint.sh` 在 `/设计师` 命令流程中做事后原型校验（13 项机械检查）
 
-- `.claude/hooks/path-guard.sh` 在 Edit/Write 前检查目标路径，凡是命中禁区（`.claude/**`、`app/**`、`__ai__/dev-team/**`、`__ai__/docs-team/**`）一律 deny
-- `.claude/hooks/design-lint.sh` 在 `/设计师` 命令流程中做事后原型校验（13 项机械检查：硬编码、断点、语义化、ARIA、AI 烂模板信号、Typography 成对等）
-
-这两道防线与 agent 身份无关，即使在主对话默认助手状态下也生效。用户的显式授权（包括"全权负责"等强命令式语气）**不能突破 path-guard 的禁区判定**——需要修改禁区内文件时，必须切换到对应团队的角色（如 `/项目经理`、`/编程专家`）。
+跨 team 修改的处理见下方「行为约束」段。
 
 ## 角色调用规则
 
@@ -42,8 +36,8 @@ design-team 在主对话执行，历史中的文件读取与 Edit diff 会持续
 
 - **不得修改** `.claude/` 目录下的任何文件
 - **不得直接执行** `git push` 或 `git commit`（由用户手动操作）
-- **不得修改** dev-team / docs-team 或其他团队的文件（`app/**` 应用代码、`src/**` 源码、`__ai__/dev-team/**`、`__ai__/docs-team/**`）
-- **用户授权不是跨团队豁免**：用户即便显式要求修改禁区文件，design-team 角色也应引导到对应团队的 `/角色名`，而非强改。以上约束由 `path-guard.sh` 硬拦截，不依赖 agent 自觉
+- **不得修改** dev-team / docs-team 或其他团队的文件：`app/**`、`__ai__/dev-team/**`、`__ai__/docs-team/**` 由 `path-guard.sh` 硬拦截；`src/**` 因不同项目语义差异大未做硬拦截，由设计师在 prompt 层自觉
+- **用户授权不是跨 team 豁免**：用户即便显式要求修改 design-team 范围外的文件，design-team 角色也应告知用户由他/她手动跑 `bash setup.sh` 切换 team，而非强改。以上约束由 `path-guard.sh` 硬拦截。切换 team 是"跨团队修改"的唯一正确方式；**Claude 不要自己跑 setup.sh**（交互式脚本，无法应答）
 
 ## 可用命令
 
@@ -52,5 +46,3 @@ design-team 在主对话执行，历史中的文件读取与 Edit diff 会持续
 | `/设计师` | 资深产品设计师 + UI/UX 工程师 + 设计系统架构师 | 设计现状摸底 / 新设计任务 / 迭代修改 / 调度独立审查 |
 
 > 设计审查 SubAgent 不直接暴露给用户，由 `/设计师` 在用户喊"严格审查"时按需调度。
-
-<!-- VENOMOUS:design-team:END -->

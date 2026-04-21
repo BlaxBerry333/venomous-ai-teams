@@ -10,8 +10,11 @@
       "Bash(git clean *)", "Bash(git rebase *)", "Bash(git merge *)",
       "Bash(git branch -D *)", "Bash(git branch -d *)",
       "Bash(git stash drop *)", "Bash(git tag -d *)",
+      "Bash(npm publish *)", "Bash(npm publish)",
+      "Bash(yarn publish *)", "Bash(yarn publish)",
       "Bash(rm -rf *)", "Bash(rm -r *)", "Bash(rmdir *)",
-      "Bash(sed -i *)", "Bash(sed -i'' *)", "Bash(tee *)", "Bash(dd *)"
+      "Bash(sed -i *)", "Bash(sed -i'' *)", "Bash(tee *)", "Bash(dd *)",
+      "Bash(bash *setup.sh*)", "Bash(sh *setup.sh*)", "Bash(./*setup.sh*)"
     ]
   },
   "hooks": {
