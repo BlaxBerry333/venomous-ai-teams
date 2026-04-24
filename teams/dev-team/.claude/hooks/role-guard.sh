@@ -22,7 +22,6 @@ fi
 get_rules() {
   case "$1" in
     "项目经理")   echo "__ai__/dev-team/**" ;;
-    "验证官")     echo "__ai__/dev-team/tasks/*/design.md | __ai__/dev-team/tasks/*/dev-tasks.md" ;;
     "程序员")     echo "__ai__/dev-team/tasks/*/dev-plan.md | __ai__/dev-team/tasks/*/dev-tasks.md | __ai__/dev-team/tasks/*/status.md | !__ai__/** | !.claude/**" ;;
     "代码审查员") echo "__ai__/dev-team/tasks/*/review.md" ;;
     "测试员")     echo "__ai__/dev-team/tasks/*/test-report.md | !__ai__/** | !.claude/**" ;;

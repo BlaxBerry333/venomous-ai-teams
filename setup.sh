@@ -16,7 +16,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TEAMS_DIR="$SCRIPT_DIR/teams"
 
 # 团队定义: 名称|描述|图标
-TEAM_DEFS="dev-team|5 角色开发流程 (设计 → 验证 → 开发 → 审查 → 测试)|🔨
+TEAM_DEFS="dev-team|4 角色开发流程 (设计 → 开发 → 审查 → 测试)|🔨
 design-team|4 角色设计流程 (设计规格 → 验证 → HTML+CSS 原型 → 设计审查)|🎨
 docs-team|领域专家驱动的知识库文档工作流|📝"
 
