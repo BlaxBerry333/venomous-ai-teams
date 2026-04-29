@@ -1,0 +1,25 @@
+{
+  "cSpell.enabled": true,
+  "cSpell.language": "en",
+  "cSpell.allowCompoundWords": true,
+  "cSpell.diagnosticLevel": "Hint",
+  "cSpell.ignorePaths": [
+    "**/.git/**",
+    "**/node_modules/**",
+    "**/__memo__/**",
+    "**/.claude/**"
+  ],
+  "cSpell.words": [
+    "Anthropic",
+    "claude",
+    "claudemd",
+    "mapfile",
+    "memo",
+    "noreply",
+    "POSIX",
+    "readarray",
+    "subagent",
+    "subagents",
+    "venomous"
+  ]
+}

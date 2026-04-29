@@ -1,0 +1,6 @@
+.DS_Store
+Thumbs.db
+
+# 开发者本地记忆，索引 README.md 除外
+__memo__/*
+!__memo__/README.md
