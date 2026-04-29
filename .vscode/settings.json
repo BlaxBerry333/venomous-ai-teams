@@ -20,6 +20,7 @@
     "readarray",
     "subagent",
     "subagents",
+    "SUBDIRS",
     "venomous"
   ]
 }

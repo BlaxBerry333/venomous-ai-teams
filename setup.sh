@@ -1,210 +1,210 @@
 #!/usr/bin/env bash
-# setup.sh — 交互式安装单个 team 到目标项目
-# 用法: bash setup.sh
-# 兼容 bash 3.2+ (macOS 默认)
-#
-# 设计：按需单装模型。一次选一个 team，框架目录 (.claude/) 和该 team 的工作目录
-# (__ai__/{team}/) 被写入目标项目。切换 team 时：重跑 setup.sh 选新 team —— 新 team
-# 的 .claude/ 会覆盖旧的（框架大脑换了），但 __ai__/{旧 team}/ 下的历史产出不会被删，
-# 与新 team 的 __ai__/{新 team}/ 在同一 __ai__/ 下共存。
+# setup.sh — Venomous AI Teams installer (interactive only).
+# Pure orchestration; all logic lives in scripts/*.sh.
 set -euo pipefail
 
-# ============================================================
-# 常量
-# ============================================================
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TEAMS_DIR="$SCRIPT_DIR/teams"
 
-# 团队定义: 名称|描述|图标
-TEAM_DEFS="dev-team|4 角色开发流程 (设计 → 开发 → 审查 → 测试)|🔨
-design-team|4 角色设计流程 (设计规格 → 验证 → HTML+CSS 原型 → 设计审查)|🎨
-docs-team|领域专家驱动的知识库文档工作流|📝"
+# shellcheck source=scripts/ui.sh
+source "$SCRIPT_DIR/scripts/ui.sh"
+# shellcheck source=scripts/platform.sh
+source "$SCRIPT_DIR/scripts/platform.sh"
+# shellcheck source=scripts/safety.sh
+source "$SCRIPT_DIR/scripts/safety.sh"
+# shellcheck source=scripts/teams.sh
+source "$SCRIPT_DIR/scripts/teams.sh"
+# shellcheck source=scripts/settings.sh
+source "$SCRIPT_DIR/scripts/settings.sh"
+# shellcheck source=scripts/install.sh
+source "$SCRIPT_DIR/scripts/install.sh"
+# shellcheck source=scripts/remove.sh
+source "$SCRIPT_DIR/scripts/remove.sh"
 
-# ============================================================
-# 颜色 & 样式
-# ============================================================
-if [ -t 1 ]; then
-  BOLD='\033[1m'; DIM='\033[2m'; RESET='\033[0m'
-  GREEN='\033[32m'; YELLOW='\033[33m'; CYAN='\033[36m'; RED='\033[31m'; MAGENTA='\033[35m'; WHITE='\033[97m'
-  BG_GREEN='\033[42m'; BG_RED='\033[41m'
-else
-  BOLD="" DIM="" RESET="" GREEN="" YELLOW="" CYAN="" RED="" MAGENTA="" WHITE="" BG_GREEN="" BG_RED=""
-fi
+fn_ui_init
 
-die()  { printf "${BG_RED}${WHITE}${BOLD} ERROR ${RESET} ${RED}%s${RESET}\n" "$1" >&2; exit 1; }
-info() { printf "  ${GREEN}✓${RESET} %s\n" "$1"; }
-warn() { printf "  ${YELLOW}!${RESET} %s\n" "$1"; }
-step() { printf "\n${CYAN}${BOLD}▸ %s${RESET}\n" "$1"; }
-
-# ============================================================
-# 标题
-# ============================================================
-printf "\n"
-printf "  ${BOLD}${MAGENTA}Venomous AI Teams${RESET}\n"
-printf "\n"
-
-# ============================================================
-# 交互式选择（单选）
-# ============================================================
-printf "  ${BOLD}可用团队${RESET} ${DIM}(一次安装一个；切换 team 请重跑 setup.sh)${RESET}\n\n"
-
-IDX=1
-while IFS='|' read -r name desc icon; do
-  [ -z "$name" ] && continue
-  printf "    ${BOLD}${WHITE}%s)${RESET}  %s  ${BOLD}%s${RESET}\n" "$IDX" "$icon" "$name"
-  printf "       ${DIM}%s${RESET}\n" "$desc"
-  IDX=$((IDX + 1))
-done <<< "$TEAM_DEFS"
-
-printf "\n  ${YELLOW}>${RESET} 请选择 ${DIM}(输入序号 1/2/3 或 team 名)${RESET}: "
-read -r SELECTION || die "读取输入失败（EOF？请用交互式终端或完整管道输入 3 行：team, 目标路径, Y）"
-
-case "$SELECTION" in
-  1) TEAM="dev-team" ;;
-  2) TEAM="design-team" ;;
-  3) TEAM="docs-team" ;;
-  dev-team|design-team|docs-team) TEAM="$SELECTION" ;;
-  *) die "无效选择: $SELECTION" ;;
-esac
-
-SRC="$TEAMS_DIR/$TEAM/.claude"
-[ -d "$SRC" ] || die "团队源目录不存在: $SRC"
-
-# ============================================================
-# 目标目录
-# ============================================================
-printf "\n  ${YELLOW}>${RESET} 目标项目路径: "
-read -r TARGET_DIR || die "读取目标路径失败（EOF？）"
-TARGET_DIR=$(echo "$TARGET_DIR" | sed "s|^~|$HOME|")
-[ -d "$TARGET_DIR" ] || die "目标目录不存在: $TARGET_DIR"
-
-# 危险路径黑名单：防止 rm -rf 打到关键目录或框架自身
-ABS_TARGET=$(cd "$TARGET_DIR" && pwd)
-case "$ABS_TARGET" in
-  /|/Users|/home|/etc|/var|/usr|/bin|/sbin|/tmp)
-    die "禁止安装到系统关键目录: $ABS_TARGET" ;;
-esac
-[ "$ABS_TARGET" = "$HOME" ] && die "禁止安装到 \$HOME 根: ${ABS_TARGET}（请选具体项目子目录）"
-[ "$ABS_TARGET" = "$SCRIPT_DIR" ] && die "禁止安装到框架自身目录: ${ABS_TARGET}（这会删除框架源码）"
-case "$ABS_TARGET/" in
-  "$SCRIPT_DIR"/*) die "禁止安装到框架子目录: ${ABS_TARGET}（会损坏框架源码）" ;;
-esac
-TARGET_DIR="$ABS_TARGET"
-
-# ============================================================
-# 确认
-# ============================================================
-printf "\n"
-printf "  ${DIM}│${RESET}  团队  ${BOLD}%s${RESET}\n" "$TEAM"
-printf "  ${DIM}│${RESET}  目标  ${BOLD}%s${RESET}\n" "$TARGET_DIR"
-
-# 检测是否已装过 team（.claude/.venomous-team 是 setup.sh 安装时写的标记）
-EXISTING_TEAM=""
-if [ -f "$TARGET_DIR/.claude/.venomous-team" ]; then
-  EXISTING_TEAM=$(cat "$TARGET_DIR/.claude/.venomous-team" 2>/dev/null | tr -d '[:space:]')
-fi
-
-if [ -n "$EXISTING_TEAM" ] && [ "$EXISTING_TEAM" != "$TEAM" ]; then
-  printf "  ${DIM}│${RESET}  ${YELLOW}注意: 检测到目标已安装 ${BOLD}%s${RESET}${YELLOW}，本次安装将${RESET}${BOLD}完全替换${RESET} ${YELLOW}.claude/${RESET}\n" "$EXISTING_TEAM"
-  printf "  ${DIM}│${RESET}        ${DIM}__ai__/%s/ 下的历史产出会被保留${RESET}\n" "$EXISTING_TEAM"
-fi
-
-printf "\n  ${YELLOW}>${RESET} 确认安装? ${DIM}(Y/n)${RESET}: "
-read -r CONFIRM || die "读取确认失败（EOF？）"
-case "$CONFIRM" in
-  n|N|no|NO) printf "\n  ${DIM}已取消${RESET}\n"; exit 0 ;;
-esac
-
-# ============================================================
-# 安全检查：.claude/ 存在但非本框架管理的内容不允许覆盖
-# ============================================================
-# 判断"本框架管理"用 .venomous-team 标记文件**是否存在**（而非内容非空），
-# 以防标记被 truncate 成 0 字节时误判。
-if [ -d "$TARGET_DIR/.claude" ] && [ ! -f "$TARGET_DIR/.claude/.venomous-team" ]; then
-  # 忽略常见系统噪声（.DS_Store 等）和 Claude Code 的用户级文件
-  # （settings.local.json 是 Claude Code 自动写的本地权限配置，应当与本框架共存）
-  REAL_CONTENT=$(find "$TARGET_DIR/.claude" -mindepth 1 \
-                   -not -name '.DS_Store' \
-                   -not -name '._*' \
-                   -not -name 'Thumbs.db' \
-                   -not -name 'settings.local.json' \
-                   -print -quit 2>/dev/null || true)
-  if [ -n "$REAL_CONTENT" ]; then
-    die ".claude/ 已存在且非本框架管理（未找到 .venomous-team 标记）。请先手动清理 $TARGET_DIR/.claude/ 或改选其他目录"
+# EXIT trap: print closure node on abnormal termination. UI_CLOSED is initialized
+# in fn_ui_init; it's set to 1 by fn_ui_done / fn_ui_cancelled / fn_ui_aborted to
+# prevent double-closure.
+_fn_setup_exit_trap() {
+  local rc=$?
+  if [ "$rc" -ne 0 ] && [ "$UI_CLOSED" -eq 0 ]; then
+    fn_ui_aborted
   fi
-fi
+}
+trap _fn_setup_exit_trap EXIT
 
-# ============================================================
-# 安装
-# ============================================================
-step "安装 $TEAM"
+fn_platform_require_bash
+fn_platform_require_jq
+fn_platform_require_gum
 
-# .claude/ 目录：完全替换。删除"任何 team 可能写入过"的所有内容——
-# 动态枚举 teams/*/.claude/ 下所有出现过的子目录名与顶层文件名，作为本框架的
-# 写入清单（会覆盖 agents/commands/templates/hooks/ 等，以及未来新增的 skills/ 之类）。
-# settings.local.json 等用户本地文件不在此清单，自然保留。
-if [ -d "$TARGET_DIR/.claude" ]; then
-  # 收集所有 team 会写入的顶层名字（用 bash 3.2+ 索引数组，防文件名含空格被 IFS 词分裂）
-  FRAMEWORK_ITEMS=()
-  for td in "$TEAMS_DIR"/*/.claude; do
-    [ -d "$td" ] || continue
-    for item in "$td"/* "$td"/.[!.]*; do
-      [ -e "$item" ] || continue
-      name=$(basename "$item")
-      # 去重（线性查询；当前规模 ~7 项，无性能问题）
-      seen=0
-      for existing in ${FRAMEWORK_ITEMS[@]+"${FRAMEWORK_ITEMS[@]}"}; do
-        [ "$existing" = "$name" ] && { seen=1; break; }
-      done
-      [ "$seen" = "0" ] && FRAMEWORK_ITEMS+=("$name")
-    done
+fn_ui_title "Venomous AI Teams"
+
+# -------------------- helpers --------------------
+
+# fn_pick_team <prompt> <name1> <name2> ...
+# Writes chosen team name to global $UI_RESULT, returns 0 on success / 1 on cancel.
+# Internally builds "<icon> <name>" labels then maps the chosen label back to the
+# original team name (by exact match, not by string splitting — so team names
+# containing spaces would still be safe if ever introduced).
+fn_pick_team() {
+  local prompt="$1"; shift
+  local names=("$@")
+  local labels=() name icon
+  for name in "${names[@]}"; do
+    icon=""
+    while IFS='|' read -r dn di; do
+      [ "$dn" = "$name" ] && { icon="$di"; break; }
+    done <<< "$TEAMS_DEFS"
+    if [ -n "$icon" ]; then
+      labels+=("$icon $name")
+    else
+      labels+=("$name")
+    fi
   done
-  # 加 .venomous-team 标记本身（由 setup 写入，不在 team 源里）
-  FRAMEWORK_ITEMS+=(".venomous-team")
 
-  for name in "${FRAMEWORK_ITEMS[@]}"; do
-    rm -rf "$TARGET_DIR/.claude/$name"
+  fn_ui_select "$prompt" "${labels[@]}" || return 1
+  local chosen="$UI_RESULT"
+
+  # Reverse map by exact label match. Pair index between labels[] and names[]
+  # is preserved by construction.
+  local i
+  for i in "${!labels[@]}"; do
+    if [ "${labels[$i]}" = "$chosen" ]; then
+      UI_RESULT="${names[$i]}"
+      return 0
+    fi
   done
-fi
 
-mkdir -p "$TARGET_DIR/.claude"
-cp -R "$SRC/." "$TARGET_DIR/.claude/"
-chmod +x "$TARGET_DIR/.claude/hooks/"*.sh 2>/dev/null || true
+  # Should be unreachable — gum returns one of the offered labels verbatim.
+  fn_ui_err "internal: chosen label not in offered set" "$chosen"
+  return 1
+}
 
-# 写入标记文件（供下次 setup.sh 切 team 检测 + 其他工具识别）
-echo "$TEAM" > "$TARGET_DIR/.claude/.venomous-team"
+# -------------------- fn_flow_install --------------------
+fn_flow_install() {
+  local available installed_in_target candidate_names=() name
+  available=$(fn_teams_list_available)
+  if [ -z "$available" ]; then
+    fn_ui_err "no teams available in framework"
+    exit 2
+  fi
 
-# 动态列出实际安装的顶层项（不同 team 子目录不同：docs-team 无 agents/templates）
-INSTALLED_ITEMS=""
-for item in "$SRC"/* "$SRC"/.[!.]*; do
-  [ -e "$item" ] || continue
-  [ -n "$INSTALLED_ITEMS" ] && INSTALLED_ITEMS="$INSTALLED_ITEMS, "
-  INSTALLED_ITEMS="${INSTALLED_ITEMS}$(basename "$item")"
-done
-info ".claude/ (${INSTALLED_ITEMS:-空})"
+  local target_input target
+  fn_ui_input "Target project path" "e.g. ~/myproject or absolute path" || { fn_ui_cancelled; exit 0; }
+  target_input="$UI_RESULT"
+  target=$(fn_safety_check_target "$target_input")
 
-# __ai__/{team}/ 工作目录：已存在则保留（用户产出），不存在则从模板复制
-if [ -d "$TEAMS_DIR/$TEAM/__ai__/$TEAM" ]; then
-  mkdir -p "$TARGET_DIR/__ai__"
-  if [ -d "$TARGET_DIR/__ai__/$TEAM" ]; then
-    warn "保留已存在的 __ai__/$TEAM/ (用户产出未覆盖)"
+  installed_in_target=$(fn_teams_list_installed "$target")
+
+  # Build candidate list (all available; reinstall is allowed)
+  while IFS= read -r name; do
+    [ -z "$name" ] && continue
+    candidate_names+=("$name")
+  done <<< "$available"
+
+  local team
+  fn_pick_team "Pick a team" "${candidate_names[@]}" || { fn_ui_cancelled; exit 0; }
+  team="$UI_RESULT"
+
+  local mode="install"
+  if fn_teams_is_installed "$team" "$target"; then
+    mode="reinstall"
+    fn_ui_node "$team is already installed in this target. Reinstalling will:"
+    fn_ui_lines \
+      "  • Replace .claude/commands/$team/" \
+      "  • Replace .claude/agents/$team/" \
+      "  • Replace .claude/hooks/$team/" \
+      "  • Replace .claude/.fragments/$team.json" \
+      "  • Re-merge settings.json" \
+      "  • Preserve __ai__/$team/ (your work)"
+    fn_ui_blank
   else
-    cp -R "$TEAMS_DIR/$TEAM/__ai__/$TEAM" "$TARGET_DIR/__ai__/"
-    info "__ai__/$TEAM/ (模板骨架)"
+    fn_ui_node "Confirm"
+    fn_ui_lines \
+      "    Action  install" \
+      "    Team    $team" \
+      "    Target  $target"
+    fn_ui_blank
   fi
-fi
 
-# ============================================================
-# 完成
-# ============================================================
-printf "\n"
-printf "  ${BOLD}${GREEN}安装完成${RESET}\n\n"
-printf "  ${DIM}目标${RESET}  %s\n\n" "$TARGET_DIR"
-printf "  ${BOLD}可用角色命令${RESET}\n"
-for f in "$SRC/commands/"*.md; do
-  [ -f "$f" ] || continue
-  CMD=$(basename "$f" .md)
-  printf "    ${CYAN}/%s${RESET}\n" "$CMD"
-done
-printf "\n  ${BOLD}开始使用${RESET}\n"
-printf "    ${WHITE}cd %s && claude${RESET}\n\n" "$TARGET_DIR"
+  if ! fn_ui_confirm; then
+    fn_ui_cancelled
+    exit 0
+  fi
+
+  fn_install_team "$team" "$target" "$mode"
+  # Record FIRST: install_team has reached its commit point (.claude/<team>/ on disk).
+  # If settings_merge later fails, the team is still recorded so a retry detects it
+  # as already-installed and uses reinstall (with stash protection).
+  fn_teams_record_add "$team" "$target"
+  fn_settings_merge "$target"
+
+  fn_ui_done
+  fn_ui_docs_links
+}
+
+# -------------------- fn_flow_remove --------------------
+fn_flow_remove() {
+  local target_input target
+  fn_ui_input "Target project path" "e.g. ~/myproject or absolute path" || { fn_ui_cancelled; exit 0; }
+  target_input="$UI_RESULT"
+  target=$(fn_safety_check_target "$target_input")
+
+  local installed names=() name
+  installed=$(fn_teams_list_installed "$target")
+  if [ -z "$installed" ]; then
+    fn_ui_err "no team installed in target" "$target"
+    exit 1
+  fi
+
+  while IFS= read -r name; do
+    [ -z "$name" ] && continue
+    names+=("$name")
+  done <<< "$installed"
+
+  local team
+  fn_pick_team "Pick team to remove" "${names[@]}" || { fn_ui_cancelled; exit 0; }
+  team="$UI_RESULT"
+
+  fn_ui_node "Removing $team:"
+  fn_ui_lines \
+    "  • Remove .claude/commands/$team/" \
+    "  • Remove .claude/agents/$team/" \
+    "  • Remove .claude/hooks/$team/" \
+    "  • Remove .claude/templates/$team/ (if any)" \
+    "  • Remove .claude/.fragments/$team.json" \
+    "  • Re-merge settings.json" \
+    "  • Preserve __ai__/$team/"
+  fn_ui_blank
+
+  if ! fn_ui_confirm; then
+    fn_ui_cancelled
+    exit 0
+  fi
+
+  fn_remove_team "$team" "$target"
+  # Update record FIRST: remove_team is the commit point; if settings_merge later
+  # fails, the team is correctly absent from the record so a retry won't mis-treat it.
+  fn_teams_record_remove "$team" "$target"
+  fn_settings_merge "$target"
+
+  fn_ui_done
+}
+
+# -------------------- main --------------------
+
+# Action labels — defined as constants so the case below stays in sync if these
+# labels ever change (i18n, copy edits).
+readonly ACTION_INSTALL="Install team"
+readonly ACTION_REMOVE="Remove team"
+
+fn_ui_select "What would you like to do?" \
+  "$ACTION_INSTALL" \
+  "$ACTION_REMOVE" \
+  || { fn_ui_cancelled; exit 0; }
+
+case "$UI_RESULT" in
+  "$ACTION_INSTALL") fn_flow_install ;;
+  "$ACTION_REMOVE")  fn_flow_remove ;;
+  *) fn_ui_err "internal: unexpected action" "$UI_RESULT"; exit 2 ;;
+esac
