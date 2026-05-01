@@ -5,6 +5,19 @@
 Packages Claude Code's multi-role + spec flow + anti-hallucination review into one-install teams.<br/>
 Install a team, and your main conversation gains that domain's "think → write → review" pipeline.
 
+## vs. third-party
+
+| Dimension | web-dev-team | BMad Method | Spec Kit | Claude Skills |
+|---|:---:|:---:|:---:|:---:|
+| Spec loop | ✅ | ✅ | ✅ | ❌ |
+| Truly independent sub-agent review | ✅<br/>3 orthogonal aspects | ⚠️<br/>same-session role review | ❌ | ❌ |
+| Hook guard (exit 2 real block) | ✅ | ❌ | ❌ | ❌ |
+| Hard line limits (anti prompt-bloat) | ✅ | ❌ | ❌ | N/A |
+| `Selection:` prefix forcing rationale | ✅ | ❌ | ❌ | ❌ |
+| Multi-team coexistence | ✅<br/>namespace-isolated | ❌ | ❌ | ⚠️ |
+| Platform | Claude Code | generic | generic | Claude |
+| Cost per medium task | $0.35-1.75 | $1-10 | varies | $0.01-0.1 |
+
 ## Available teams
 
 | Team | What it does | Docs |

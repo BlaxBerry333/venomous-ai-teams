@@ -4,20 +4,7 @@
 
 ## 是什么
 
-逼 Claude 在 web 开发任务上**先想清楚再写**：写 spec、给选型理由、独立 sub-agent 复审。
-
-## 对比第三方
-
-| 维度 | web-dev-team | BMad Method | Spec Kit | Claude Skills |
-|---|:---:|:---:|:---:|:---:|
-| Spec 闭环 | ✅ | ✅ | ✅ | ❌ |
-| 真独立 sub-agent 审查 | ✅<br/>三切面正交 | ⚠️<br/>同会话角色互审 | ❌ | ❌ |
-| Hook 防误改（exit 2 真阻断） | ✅ | ❌ | ❌ | ❌ |
-| 行数硬规（防 prompt 膨胀） | ✅<br/>≤50/35/60/80 | ❌ | ❌ | N/A |
-| 「选型」前缀强制给理由 | ✅ | ❌ | ❌ | ❌ |
-| 多 team 共存 | ✅<br/>命名空间隔离 | ❌ | ❌ | ⚠️ |
-| 平台 | Claude Code | 通用 | 通用 | Claude |
-| 单次中等需求成本 | $0.35-1.75 | $1-10 | 变化大 | $0.01-0.1 |
+逼 Claude 在 web 全栈任务上**先想清楚再写**：架构者管全栈决策、执行者填实现、独立 sub-agent 复审。
 
 ## 工作流 + 特点
 
@@ -27,6 +14,14 @@
 - **真独立审查**：3 个 sub-agent 各自上下文，不是 LLM 自审
 - **全程可追溯**：spec / 汇报表 / 审查发现都落盘
 - **小需求绕过**：typo 直跑、需求过虚反问，不烧全流程
+
+## 角色
+
+| 角色 | 干啥 | 不干啥 |
+|---|---|---|
+| **架构者** | 全栈决策 → 出 spec + 5 列汇报表 | 不写代码 |
+| **执行者** | 照 spec 填实现细节 → 改代码 | 不改 spec、不动重决策 |
+| **审查员** | 调度 3 个 sub-agent 三切面正交并审 | 不写代码、不改 spec |
 
 ## 使用
 
@@ -64,7 +59,7 @@ bash setup.sh   # 交互式选 install / remove + team + 目标项目
 │   ├── path-guard.sh                # 阻断写入 .claude/ 和别 team 目录
 │   └── spec-required.sh             # 多文件改动无 spec 时提醒
 ├── templates/web-dev-team/
-│   └── spec-template.md             # spec 七节模板
+│   └── spec-template.md             # spec 八节模板（运行拓扑节按需出现）
 └── .fragments/web-dev-team.json     # hook + permissions 片段（合成进 settings.json）
 
 __ai__/web-dev-team/                 # 你的产物（删除 team 时保留）

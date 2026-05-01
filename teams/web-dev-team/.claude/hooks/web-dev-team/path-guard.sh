@@ -36,7 +36,8 @@ case "$abs" in
 esac
 
 # 2. 拦写 __ai__/<别 team>/
-# 真相源：__ai__/__teams__.txt（每行一 team），不在表里且不是本 team 目录的一律拦
+# 实现：只放过本 team 目录（$TEAM）和 __teams__.txt 维护文件，其他 __ai__/<x>/ 一律拦
+# （PreToolUse hook 按 team 注册，仅在 web-dev-team 工具调用时触发，不会跨 team 拦截）
 case "$abs" in
   "$proj"/__ai__/*)
     rel="${abs#"$proj"/__ai__/}"

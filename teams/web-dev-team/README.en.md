@@ -4,20 +4,7 @@
 
 ## What it is
 
-Forces Claude to **think before writing** on web dev tasks: write a spec, justify every selection, and run an independent sub-agent review.
-
-## vs. third-party
-
-| Dimension | web-dev-team | BMad Method | Spec Kit | Claude Skills |
-|---|:---:|:---:|:---:|:---:|
-| Spec loop | ✅ | ✅ | ✅ | ❌ |
-| Truly independent sub-agent review | ✅<br/>3 orthogonal aspects | ⚠️<br/>same-session role review | ❌ | ❌ |
-| Hook guard (exit 2 real block) | ✅ | ❌ | ❌ | ❌ |
-| Hard line limits (anti prompt-bloat) | ✅<br/>≤50/35/60/80 | ❌ | ❌ | N/A |
-| `Selection:` prefix forcing rationale | ✅ | ❌ | ❌ | ❌ |
-| Multi-team coexistence | ✅<br/>namespace-isolated | ❌ | ❌ | ⚠️ |
-| Platform | Claude Code | generic | generic | Claude |
-| Cost per medium task | $0.35-1.75 | $1-10 | varies | $0.01-0.1 |
+Forces Claude to **think before writing** on full-stack web tasks: architect owns full-stack decisions, executor fills in implementation, independent sub-agents review.
 
 ## Workflow + features
 
@@ -27,6 +14,14 @@ Forces Claude to **think before writing** on web dev tasks: write a spec, justif
 - **Truly independent review**: 3 sub-agents in separate contexts, not LLM self-review
 - **End-to-end traceability**: spec / report table / review findings all persisted
 - **Small requests bypass**: typos go direct, vague requests get questioned — no full-flow burn
+
+## Roles
+
+| Role | Does | Doesn't do |
+|---|---|---|
+| **架构者** (Architect) | Full-stack decisions → emits spec + 5-column report table | No code |
+| **执行者** (Executor) | Fills in implementation per spec → modifies code | No spec edits, no architectural decisions |
+| **审查员** (Reviewer) | Orchestrates 3 sub-agents on orthogonal aspectsin independent contexts | No code, no spec edits |
 
 ## Usage
 
@@ -64,7 +59,7 @@ bash setup.sh   # interactive: install / remove + team + target project
 │   ├── path-guard.sh                # Blocks writes to .claude/ and other-team dirs
 │   └── spec-required.sh             # Warns on multi-file changes without a spec
 ├── templates/web-dev-team/
-│   └── spec-template.md             # Spec 7-section template
+│   └── spec-template.md             # Spec 8-section template (runtime-topology section is conditional)
 └── .fragments/web-dev-team.json     # hooks + permissions fragment (merged into settings.json)
 
 __ai__/web-dev-team/                 # Your artifacts (preserved on team removal)
