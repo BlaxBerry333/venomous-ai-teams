@@ -1,6 +1,8 @@
 .DS_Store
 Thumbs.db
 
+__playground__/*
+
 __memo__/*
 !__memo__/README.md
-__playground__/
+!__memo__/README.*.md

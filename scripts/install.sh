@@ -5,12 +5,13 @@
 # fn_install_team <team> <target> <mode>   # mode = install | reinstall
 #
 # Layout (source 1:1 mirrors install destination):
+#   teams/<team>/.claude/commands/<team>.md   (optional: team entry, /<team>)
 #   teams/<team>/.claude/commands/<team>/
 #   teams/<team>/.claude/agents/<team>/
 #   teams/<team>/.claude/hooks/<team>/
 #   teams/<team>/.claude/templates/<team>/    (optional)
 #   teams/<team>/.claude/.fragments/<team>.json
-#   teams/<team>/__ai__/<team>/               (skeleton)
+#   teams/<team>/__ai__/<team>/               (optional starter; absent → mkdir empty)
 #
 # Failure model: reinstall stages old content as <name>.bak.<id> via mv (atomic
 # rename), copies new content INCLUDING __ai__/<team>/ skeleton, then drops the
@@ -38,8 +39,10 @@ fn_install_team() {
   local stash_id="$$.$RANDOM.$(date +%s)"
   local stash_subs=""        # subs whose old <team>/ was stashed as bak (reinstall only)
   local stash_frag=0         # 1 if old .fragments/<team>.json was stashed (reinstall only)
+  local stash_entry=0        # 1 if old commands/<team>.md was stashed (reinstall only)
   local installed_subs=""    # subs where we successfully cp'd new <team>/ (rollback removes)
   local installed_frag=0     # 1 if we successfully cp'd new .fragments/<team>.json
+  local installed_entry=0    # 1 if we successfully cp'd new commands/<team>.md
   local ai_pristine=0        # 1 if __ai__/<team>/ was created by this run; rollback removes
   local rollback_done=0
 
@@ -54,6 +57,9 @@ fn_install_team() {
     done
     if [ -d "$target/.claude/.fragments" ]; then
       find "$target/.claude/.fragments" -maxdepth 1 -type f -name ".${team}.json.bak.*" -delete 2>/dev/null || true
+    fi
+    if [ -d "$target/.claude/commands" ]; then
+      find "$target/.claude/commands" -maxdepth 1 -type f -name ".${team}.md.bak.*" -delete 2>/dev/null || true
     fi
   fi
 
@@ -79,6 +85,10 @@ fn_install_team() {
     if [ "$installed_frag" -eq 1 ] || [ "$stash_frag" -eq 1 ]; then
       rm -f "$target/.claude/.fragments/$team.json" 2>/dev/null || true
     fi
+    # 2b. Remove freshly-copied commands/<team>.md entry file
+    if [ "$installed_entry" -eq 1 ] || [ "$stash_entry" -eq 1 ]; then
+      rm -f "$target/.claude/commands/$team.md" 2>/dev/null || true
+    fi
     # 3. Restore stashed bak (reinstall only)
     for sub in $stash_subs; do
       if [ -d "$target/.claude/$sub/.${team}.bak.${stash_id}" ]; then
@@ -88,6 +98,11 @@ fn_install_team() {
     if [ "$stash_frag" -eq 1 ]; then
       if [ -f "$target/.claude/.fragments/.${team}.json.bak.${stash_id}" ]; then
         mv "$target/.claude/.fragments/.${team}.json.bak.${stash_id}" "$target/.claude/.fragments/$team.json" 2>/dev/null || true
+      fi
+    fi
+    if [ "$stash_entry" -eq 1 ]; then
+      if [ -f "$target/.claude/commands/.${team}.md.bak.${stash_id}" ]; then
+        mv "$target/.claude/commands/.${team}.md.bak.${stash_id}" "$target/.claude/commands/$team.md" 2>/dev/null || true
       fi
     fi
     # 4. Clean partial __ai__/<team>/ only if this run created it (was missing before)
@@ -116,6 +131,14 @@ fn_install_team() {
         exit 2
       fi
       stash_frag=1
+    fi
+    if [ -f "$target/.claude/commands/$team.md" ]; then
+      if ! mv "$target/.claude/commands/$team.md" "$target/.claude/commands/.${team}.md.bak.${stash_id}"; then
+        fn_ui_err "failed to stash existing commands/$team.md"
+        _fn_install_rollback
+        exit 2
+      fi
+      stash_entry=1
     fi
   fi
 
@@ -164,26 +187,50 @@ fn_install_team() {
     fn_ui_warn "no .fragments/$team.json in source — settings will not include $team-specific hooks/permissions"
   fi
 
-  # __ai__/<team>/ skeleton: copy only when target is missing (never overwrite user work).
-  # Failure here triggers rollback so user's original .claude/<team>/ is restored.
-  local src_ai="$src/__ai__/$team"
-  if [ -d "$src_ai" ]; then
-    if ! mkdir -p "$target/__ai__"; then
-      fn_ui_err "failed to create __ai__/ (permission?)"
+  # Copy team entry file commands/<team>.md (optional). Triggers /<team> directly.
+  local src_entry="$src/.claude/commands/$team.md"
+  if [ -f "$src_entry" ]; then
+    if ! mkdir -p "$target/.claude/commands"; then
+      fn_ui_err "failed to create .claude/commands/"
       _fn_install_rollback
       exit 2
     fi
-    if [ -d "$target/__ai__/$team" ]; then
-      fn_ui_warn "__ai__/$team/ exists — preserved (not overwritten)"
-    else
-      ai_pristine=1
-      if ! cp -R "$src_ai" "$target/__ai__/"; then
-        fn_ui_err "failed to copy __ai__/$team/ skeleton (disk full? permission?)"
-        _fn_install_rollback
-        exit 2
-      fi
-      fn_ui_ok "__ai__/$team/ (skeleton)"
+    installed_entry=1
+    if ! cp "$src_entry" "$target/.claude/commands/$team.md"; then
+      fn_ui_err "failed to copy commands/$team.md"
+      _fn_install_rollback
+      exit 2
     fi
+    fn_ui_ok ".claude/commands/$team.md"
+  fi
+
+  # __ai__/<team>/ : never overwrite user work. Source dir absent → mkdir empty.
+  # Source dir present (team ships starter files) → cp -R.
+  # Failure here triggers rollback so user's original .claude/<team>/ is restored.
+  local src_ai="$src/__ai__/$team"
+  if ! mkdir -p "$target/__ai__"; then
+    fn_ui_err "failed to create __ai__/ (permission?)"
+    _fn_install_rollback
+    exit 2
+  fi
+  if [ -d "$target/__ai__/$team" ]; then
+    fn_ui_warn "__ai__/$team/ exists — preserved (not overwritten)"
+  elif [ -d "$src_ai" ]; then
+    ai_pristine=1
+    if ! cp -R "$src_ai" "$target/__ai__/"; then
+      fn_ui_err "failed to copy __ai__/$team/ starter (disk full? permission?)"
+      _fn_install_rollback
+      exit 2
+    fi
+    fn_ui_ok "__ai__/$team/ (starter)"
+  else
+    ai_pristine=1
+    if ! mkdir -p "$target/__ai__/$team"; then
+      fn_ui_err "failed to create __ai__/$team/ (permission?)"
+      _fn_install_rollback
+      exit 2
+    fi
+    fn_ui_ok "__ai__/$team/ (created)"
   fi
 
   # All copies succeeded — commit point: drop stashed bak.
@@ -194,6 +241,9 @@ fn_install_team() {
     done
     if [ "$stash_frag" -eq 1 ]; then
       rm -f "$target/.claude/.fragments/.${team}.json.bak.${stash_id}" 2>/dev/null || true
+    fi
+    if [ "$stash_entry" -eq 1 ]; then
+      rm -f "$target/.claude/commands/.${team}.md.bak.${stash_id}" 2>/dev/null || true
     fi
   fi
 

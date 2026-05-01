@@ -22,6 +22,12 @@ fn_remove_team() {
     removed=$((removed+1))
   fi
 
+  if [ -f "$target/.claude/commands/$team.md" ]; then
+    rm -f "$target/.claude/commands/$team.md"
+    fn_ui_ok "removed .claude/commands/$team.md"
+    removed=$((removed+1))
+  fi
+
   if [ -d "$target/__ai__/$team" ]; then
     fn_ui_warn "__ai__/$team/ preserved (your work)"
   fi

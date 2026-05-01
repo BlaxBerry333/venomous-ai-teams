@@ -1,8 +1,8 @@
-# GitHub language statistics: only count Shell
-# All other files are prompt templates, not source code
+# 排除 IDE / 编辑器配置
+.vscode/** linguist-vendored
 
-teams/**/*.md linguist-documentation
-teams/**/*.css linguist-generated
-teams/**/*.html linguist-generated
-teams/**/*.json linguist-generated
+# 排除文档和模板
 *.md linguist-documentation
+
+# 排除开发者 memo
+__memo__/** linguist-vendored
