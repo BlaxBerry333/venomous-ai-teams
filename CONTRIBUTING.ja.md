@@ -41,7 +41,7 @@ venomous-ai-teams/
 │   ├── CLAUDE.md               # フレームワーク開発規範（≤ 40 行ハード制限）
 │   ├── settings.json
 │   ├── agents/
-│   │   └── 审查员.md           # 反対挑刺 sub-agent（新 team 開発時に必須 spawn）
+│   │   └── 开发审查员.md       # 反対挑刺 sub-agent（新 team 開発時に必須 spawn、team 成果物の审查员と区別）
 │   └── hooks/
 │       └── load-memo.sh        # SessionStart で `status: 进行中` の memo todo を注入
 ├── __memo__/                   # セッション跨ぎアーキテクチャ判断 / 踏み抜き教訓（README 以外 gitignore）
@@ -57,11 +57,11 @@ venomous-ai-teams/
 3. prompt ファイルは行数ハード制限を守る（架构者 ≤ 50 / 执行者 ≤ 35 / sub-agent ≤ 60 / slash command ≤ 80）
 4. `.fragments/<team>.json`（hook + permissions フラグメント）を書く
 5. 実走テスト：`bash setup.sh` で `__playground__/<fake-app>/` にインストールして実シナリオで動かす
-6. 完了宣言前に `.claude/agents/审查员.md` を spawn、独立した 2 インスタンス以上がゼロ所見でようやく通過
+6. 完了宣言前に `.claude/agents/开发审查员.md` を spawn、独立した 2 インスタンス以上がゼロ所見でようやく通過
 
 ## 重要な制約
 
-- `.claude/{agents,commands,hooks}/`、`teams/*/.claude/{agents,commands,hooks,settings.json}`、`setup.sh` を編集 → 必ず審査員を spawn（`.claude/CLAUDE.md` 参照）
+- `.claude/{agents,commands,hooks}/`、`teams/*/.claude/{agents,commands,hooks,settings.json}`、`setup.sh` を編集 → 必ず开发审查员を spawn（`.claude/CLAUDE.md` 参照）
 - `__memo__/` 内の `status: 已定稿` の memo は編集しない（実際に誤りがある場合を除く）
 - commit に `Co-Authored-By: Claude` などの AI 署名は付けない
 - bash スクリプトは macOS bash 3.2+ 互換（`mapfile` / `declare -A` / `\s\d\w` 等禁止）

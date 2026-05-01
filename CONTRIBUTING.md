@@ -41,7 +41,7 @@ venomous-ai-teams/
 │   ├── CLAUDE.md               # 框架开发规范（≤ 40 行硬规）
 │   ├── settings.json
 │   ├── agents/
-│   │   └── 审查员.md           # 反向挑刺 sub-agent（开发新 team 时强制 spawn）
+│   │   └── 开发审查员.md       # 反向挑刺 sub-agent（开发新 team 时强制 spawn，跟产物 team 的审查员区分）
 │   └── hooks/
 │       └── load-memo.sh        # SessionStart 注入 status: 进行中 的 memo 挂账
 ├── __memo__/                   # 跨会话架构决定 / 踩坑教训（gitignore，README 除外）
@@ -57,11 +57,11 @@ venomous-ai-teams/
 3. 写 prompt 文件遵守行数硬规（架构者 ≤ 50 / 执行者 ≤ 35 / sub-agent ≤ 60 / slash command ≤ 80）
 4. 写 `.fragments/<team>.json`（hook + permissions 片段）
 5. 实跑测试：`bash setup.sh` 装到 `__playground__/<fake-app>/` 跑真实场景
-6. 改完后宣告完成前 spawn `.claude/agents/审查员.md` 至少 2 个独立实例都零发现才算通过
+6. 改完后宣告完成前 spawn `.claude/agents/开发审查员.md` 至少 2 个独立实例都零发现才算通过
 
 ## 关键约束
 
-- 改 `.claude/{agents,commands,hooks}/`、`teams/*/.claude/{agents,commands,hooks,settings.json}`、`setup.sh` → 必须 spawn 审查员（见 `.claude/CLAUDE.md`）
+- 改 `.claude/{agents,commands,hooks}/`、`teams/*/.claude/{agents,commands,hooks,settings.json}`、`setup.sh` → 必须 spawn 开发审查员（见 `.claude/CLAUDE.md`）
 - 不改 `__memo__/` 内已 `status: 已定稿` 的 memo（除非真有错）
 - commit 不带 `Co-Authored-By: Claude` 等 AI 署名
 - bash 脚本兼容 macOS bash 3.2+（禁 `mapfile` / `declare -A` / `\s\d\w` 等）

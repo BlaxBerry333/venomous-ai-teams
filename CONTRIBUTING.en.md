@@ -41,7 +41,7 @@ venomous-ai-teams/
 │   ├── CLAUDE.md               # Framework dev rules (≤ 40-line hard limit)
 │   ├── settings.json
 │   ├── agents/
-│   │   └── 审查员.md           # Adversarial review sub-agent (must spawn when developing new teams)
+│   │   └── 开发审查员.md       # Adversarial review sub-agent (must spawn when developing new teams; distinct from team-product reviewers)
 │   └── hooks/
 │       └── load-memo.sh        # SessionStart injection of `status: 进行中` memo todos
 ├── __memo__/                   # Cross-session architecture decisions / lessons (gitignored except README)
@@ -57,11 +57,11 @@ venomous-ai-teams/
 3. Write prompts under hard line limits (architect ≤ 50 / executor ≤ 35 / sub-agent ≤ 60 / slash command ≤ 80)
 4. Write `.fragments/<team>.json` (hook + permissions fragment)
 5. Live test: `bash setup.sh` install to `__playground__/<fake-app>/` and run real scenarios
-6. Before declaring done, spawn `.claude/agents/审查员.md` — at least 2 independent instances must report zero findings
+6. Before declaring done, spawn `.claude/agents/开发审查员.md` — at least 2 independent instances must report zero findings
 
 ## Key constraints
 
-- Editing `.claude/{agents,commands,hooks}/`, `teams/*/.claude/{agents,commands,hooks,settings.json}`, or `setup.sh` → MUST spawn the reviewer (see `.claude/CLAUDE.md`)
+- Editing `.claude/{agents,commands,hooks}/`, `teams/*/.claude/{agents,commands,hooks,settings.json}`, or `setup.sh` → MUST spawn 开发审查员 (see `.claude/CLAUDE.md`)
 - Don't edit `__memo__/` files marked `status: 已定稿` (unless they're actually wrong)
 - Commits must NOT include `Co-Authored-By: Claude` or other AI signatures
 - bash scripts must be compatible with macOS bash 3.2+ (no `mapfile` / `declare -A` / `\s\d\w` etc.)
