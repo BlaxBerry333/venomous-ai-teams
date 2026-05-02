@@ -5,24 +5,12 @@
 Claude Code のマルチロール + spec フロー + 反幻覚レビューを 1 コマンドでインストール可能な team にパッケージ化。<br/>
 team を入れると、メイン対話にその領域の「考える → 書く → 審査」パイプラインが入る。
 
-## サードパーティとの比較
-
-| 項目 | web-dev-team | BMad Method | Spec Kit | Claude Skills |
-|---|:---:|:---:|:---:|:---:|
-| Spec ループ | ✅ | ✅ | ✅ | ❌ |
-| 真に独立した sub-agent レビュー | ✅<br/>3 観点直交 | ⚠️<br/>同一セッション内ロール相互レビュー | ❌ | ❌ |
-| Hook ガード（exit 2 で実ブロック） | ✅ | ❌ | ❌ | ❌ |
-| 行数ハード制限（prompt 肥大化防止） | ✅ | ❌ | ❌ | N/A |
-| 「選定」プレフィックスで理由を強制 | ✅ | ❌ | ❌ | ❌ |
-| マルチ team 共存 | ✅<br/>名前空間分離 | ❌ | ❌ | ⚠️ |
-| プラットフォーム | Claude Code | 汎用 | 汎用 | Claude |
-| 中規模タスク 1 回あたりのコスト | $0.35-1.75 | $1-10 | 変動 | $0.01-0.1 |
-
 ## 利用可能な team
 
 | Team | 内容 | ドキュメント |
 |---|---|---|
 | **web-dev-team** | web 開発 | [中文](teams/web-dev-team/README.md) · [English](teams/web-dev-team/README.en.md) · [日本語](teams/web-dev-team/README.ja.md) |
+| **doc-writing-team** | 出典付き markdown ドキュメント執筆 | [中文](teams/doc-writing-team/README.md) · [English](teams/doc-writing-team/README.en.md) · [日本語](teams/doc-writing-team/README.ja.md) |
 
 ## インストール
 

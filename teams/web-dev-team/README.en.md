@@ -23,6 +23,19 @@ Forces Claude to **think before writing** on full-stack web tasks: architect own
 | **执行者** (Executor) | Fills in implementation per spec → modifies code | No spec edits, no architectural decisions |
 | **审查员** (Reviewer) | Orchestrates 3 sub-agents on orthogonal aspectsin independent contexts | No code, no spec edits |
 
+## vs. third-party (data: 2026-05)
+
+| Dimension | web-dev-team | BMad Method | Spec Kit | Claude Skills |
+|---|:---:|:---:|:---:|:---:|
+| Spec loop | ✅ | ✅ | ✅ | ❌ |
+| Truly independent sub-agent review | ✅<br/>3 orthogonal aspects | ⚠️<br/>in-session persona | ⚠️<br/>community ext required | ❌ |
+| Hook guard<br/>(exit 2 real block) | ✅ | ❌ | ⚠️<br/>ext required | ❌ |
+| Hard line limits<br/>(anti prompt-bloat) | ✅ | ❌ | ❌ | N/A |
+| `Selection:` forces rationale | ✅ | ❌ | ⚠️<br/>indirect | ❌ |
+| Multi-team coexistence | ✅<br/>namespace-isolated | ❌ | ❌ | ⚠️<br/>org-level |
+| Platform | Claude Code | multi-IDE | multi-platform | Claude product line |
+| Cost per medium task | $0.35-1.75 | $1-10 | varies | $0.01-0.1 |
+
 ## Usage
 
 ### Install / Remove

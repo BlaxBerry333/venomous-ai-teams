@@ -5,24 +5,12 @@
 把 Claude Code 的多角色 + spec 流程 + 反幻觉审查打包成一键安装的 team。<br/>
 装哪个 team，主对话就具备哪个领域的"想-写-审"流水线。
 
-## 对比第三方
-
-| 维度 | web-dev-team | BMad Method | Spec Kit | Claude Skills |
-|---|:---:|:---:|:---:|:---:|
-| Spec 闭环 | ✅ | ✅ | ✅ | ❌ |
-| 真独立 sub-agent 审查 | ✅<br/>三切面正交 | ⚠️<br/>同会话角色互审 | ❌ | ❌ |
-| Hook 防误改（exit 2 真阻断） | ✅ | ❌ | ❌ | ❌ |
-| 行数硬规（防 prompt 膨胀） | ✅ | ❌ | ❌ | N/A |
-| 「选型」前缀强制给理由 | ✅ | ❌ | ❌ | ❌ |
-| 多 team 共存 | ✅<br/>命名空间隔离 | ❌ | ❌ | ⚠️ |
-| 平台 | Claude Code | 通用 | 通用 | Claude |
-| 单次中等需求成本 | $0.35-1.75 | $1-10 | 变化大 | $0.01-0.1 |
-
 ## 可用 team
 
 | Team | 干啥 | 文档 |
 |---|---|---|
 | **web-dev-team** | web 开发 | [中文](teams/web-dev-team/README.md) · [English](teams/web-dev-team/README.en.md) · [日本語](teams/web-dev-team/README.ja.md) |
+| **doc-writing-team** | 带来源的 markdown 文档写作 | [中文](teams/doc-writing-team/README.md) · [English](teams/doc-writing-team/README.en.md) · [日本語](teams/doc-writing-team/README.ja.md) |
 
 ## 安装
 
