@@ -49,12 +49,15 @@ fn_ui_title "Venomous AI Teams"
 fn_pick_team() {
   local prompt="$1"; shift
   local names=("$@")
-  local labels=() name icon
+  local labels=() name icon def dn di
   for name in "${names[@]}"; do
     icon=""
-    while IFS='|' read -r dn di; do
-      [ "$dn" = "$name" ] && { icon="$di"; break; }
-    done <<< "$TEAMS_DEFS"
+    if [ "${#TEAMS_DEFS[@]}" -gt 0 ]; then
+      for def in "${TEAMS_DEFS[@]}"; do
+        IFS='|' read -r dn di <<< "$def"
+        [ "$dn" = "$name" ] && { icon="$di"; break; }
+      done
+    fi
     if [ -n "$icon" ]; then
       labels+=("$icon $name")
     else

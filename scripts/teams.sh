@@ -6,28 +6,34 @@
 
 TEAMS_RECORD_FILE="__ai__/__teams__.txt"
 
-# Team metadata. Format: name|icon
+# Team metadata. Format per element: "name|icon".
 # Description lives in teams/<team>/README.md (per spec: simple icon+name in selector).
-TEAMS_DEFS="web-dev-team|🔨"
+# Add a new team by appending one line to this array — bash 3.2 indexed array (no `declare -A`).
+TEAMS_DEFS=(
+  "web-dev-team|🔨"
+  "doc-writing-team|📝"
+)
 
 # Echo each available team name on its own line.
 fn_teams_list_available() {
+  [ "${#TEAMS_DEFS[@]}" -eq 0 ] && return 0  # bash 3.2 + set -u 下空数组展开会 unbound
   local def name
-  while IFS='|' read -r name _; do
-    [ -z "$name" ] && continue
+  for def in "${TEAMS_DEFS[@]}"; do
+    IFS='|' read -r name _ <<< "$def"
     [ -d "$SCRIPT_DIR/teams/$name" ] || continue
     printf "%s\n" "$name"
-  done <<< "$TEAMS_DEFS"
+  done
 }
 
 # Echo "<icon> <name>" lines for selector display.
 fn_teams_list_available_pretty() {
-  local name icon
-  while IFS='|' read -r name icon; do
-    [ -z "$name" ] && continue
+  [ "${#TEAMS_DEFS[@]}" -eq 0 ] && return 0
+  local def name icon
+  for def in "${TEAMS_DEFS[@]}"; do
+    IFS='|' read -r name icon <<< "$def"
     [ -d "$SCRIPT_DIR/teams/$name" ] || continue
     printf "%s %s\n" "$icon" "$name"
-  done <<< "$TEAMS_DEFS"
+  done
 }
 
 # fn_teams_list_installed <target> -> echo each installed team on its own line.
