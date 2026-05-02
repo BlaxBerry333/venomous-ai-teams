@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
-# path-guard.sh — 拦截 web-dev-team 写到别 team 目录或 .claude/ 的尝试
-# 仅在用户用过 web-dev-team（__ai__/web-dev-team/ 已存在）时启用，避免阻断未用 team 的用户手敲 .claude/
-# PreToolUse on Write/Edit. Claude Code: exit 0 通过 / exit 2 阻断（stderr 给 LLM）/ exit 1 不阻断仅显示通知
-# 兼容 macOS bash 3.2+
+# PreToolUse Edit/Write: 拦 sub-agent 写 .claude/。多 team 共存安全（不跨 team 拦截）。
 set -euo pipefail
 
 TEAM="web-dev-team"
@@ -11,44 +8,22 @@ proj="${CLAUDE_PROJECT_DIR:-.}"
 proj="$(cd "$proj" 2>/dev/null && pwd)" || proj="${CLAUDE_PROJECT_DIR:-.}"
 team_dir="$proj/__ai__/$TEAM"
 
-# 读 stdin JSON，提 file_path 字段（不依赖 jq，用 grep + sed）
 input="$(cat)"
-fp="$(printf '%s' "$input" | grep -oE '"file_path"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n1 | sed -e 's/.*"file_path"[[:space:]]*:[[:space:]]*"//' -e 's/"$//')"
+# `|| true` 包住：set -e 下 grep 无匹配会非零退出（CLAUDE.md Bash 兼容节）
+fp="$({ printf '%s' "$input" | grep -oE '"file_path"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n1 | sed -e 's/.*"file_path"[[:space:]]*:[[:space:]]*"//' -e 's/"$//'; } || true)"
 
-# 没解到 file_path 直接放过（不是本 hook 该拦的场景）
 [ -z "$fp" ] && exit 0
-
-# 用户从未用过 web-dev-team → 静默放过（避免阻断手敲 .claude/ 等正常操作）
+# team 未初始化 → 静默放过（避免阻断未用 team 的用户手敲 .claude/）
 [ -d "$team_dir" ] || exit 0
 
-# 转绝对路径（为 case 模式匹配做基准）
 case "$fp" in
   /*) abs="$fp" ;;
   *)  abs="$proj/$fp" ;;
 esac
 
-# 1. 拦写 .claude/（防误改 team 自身配置）
 case "$abs" in
   "$proj"/.claude/*|"$proj"/.claude)
     printf '[path-guard] web-dev-team 禁止写入 .claude/：%s\n' "$fp" >&2
-    exit 2
-    ;;
-esac
-
-# 2. 拦写 __ai__/<别 team>/
-# 实现：只放过本 team 目录（$TEAM）和 __teams__.txt 维护文件，其他 __ai__/<x>/ 一律拦
-# （PreToolUse hook 按 team 注册，仅在 web-dev-team 工具调用时触发，不会跨 team 拦截）
-case "$abs" in
-  "$proj"/__ai__/*)
-    rel="${abs#"$proj"/__ai__/}"
-    # 提第一段目录名
-    sub="${rel%%/*}"
-    # __teams__.txt 本身可写（teams.sh 会维护）
-    [ "$sub" = "__teams__.txt" ] && exit 0
-    # 本 team 自己的目录放过
-    [ "$sub" = "$TEAM" ] && exit 0
-    # 其他 __ai__/<x>/ 一律拦
-    printf '[path-guard] web-dev-team 禁止写入别 team 目录 __ai__/%s/：%s\n' "$sub" "$fp" >&2
     exit 2
     ;;
 esac

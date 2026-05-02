@@ -44,25 +44,27 @@ bash setup.sh   # インタラクティブ：install / remove + team + 対象プ
 ### インストール後のディレクトリ構成（あなたのプロジェクト内）
 
 ```
-.claude/
-├── commands/
-│   ├── web-dev-team.md              # /web-dev-team エントリ（フルフロー調停）
-│   └── web-dev-team/
-│       ├── 架构者.md                # /web-dev-team:架构者
-│       ├── 执行者.md                # /web-dev-team:执行者
-│       └── 审查员.md                # /web-dev-team:审查员（3 sub-agent を調停）
-├── agents/web-dev-team/             # 3 つの独立 sub-agent
-│   ├── 审查员-逻辑审查.md
-│   ├── 审查员-现有影响审查.md
-│   └── 审查员-需求复审.md
-├── hooks/web-dev-team/              # PreToolUse hook
-│   ├── path-guard.sh                # .claude/ と他 team ディレクトリへの書き込みをブロック
-│   └── spec-required.sh             # 複数ファイル変更時に spec なしなら警告
-├── templates/web-dev-team/
-│   └── spec-template.md             # spec 8 セクションテンプレート（運行トポロジー節は条件付き）
-└── .fragments/web-dev-team.json     # hooks + permissions フラグメント（settings.json に合成）
-
-__ai__/web-dev-team/                 # あなたの成果物（team 削除時も保持）
-└── specs/
-    └── YYYYMMDD_<slug>.md           # アーキテクトが書いた spec
+<対象プロジェクト>/
+├── .claude/
+│   ├── commands/
+│   │   ├── web-dev-team.md              # /web-dev-team エントリ（フルフロー調停）
+│   │   └── web-dev-team/
+│   │       ├── 架构者.md                # /web-dev-team:架构者
+│   │       ├── 执行者.md                # /web-dev-team:执行者
+│   │       └── 审查员.md                # /web-dev-team:审查员（3 sub-agent を調停）
+│   ├── agents/web-dev-team/             # 3 つの独立 sub-agent
+│   │   ├── 审查员-逻辑审查.md
+│   │   ├── 审查员-现有影响审查.md
+│   │   └── 审查员-需求复审.md
+│   ├── hooks/web-dev-team/              # PreToolUse hook
+│   │   ├── path-guard.sh                # sub-agent の .claude/ への書き込みをブロック
+│   │   └── spec-required.sh             # 複数ファイル変更時に spec なしなら警告
+│   ├── templates/web-dev-team/
+│   │   └── spec-template.md             # spec 8 セクションテンプレート（運行トポロジー節は条件付き）
+│   └── .fragments/web-dev-team.json     # hooks + permissions フラグメント（settings.json に合成）
+│
+└── __ai__/
+    └── web-dev-team/                    # あなたの成果物（team 削除時も保持）
+        └── specs/
+            └── YYYYMMDD_<slug>.md       # アーキテクトが書いた spec
 ```

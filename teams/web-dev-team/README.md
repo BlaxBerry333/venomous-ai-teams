@@ -44,26 +44,28 @@ bash setup.sh   # 交互式选 install / remove + team + 目标项目
 ### 装后目录结构（你的项目里）
 
 ```
-.claude/
-├── commands/
-│   ├── web-dev-team.md              # /web-dev-team 入口（全流程调度）
-│   └── web-dev-team/
-│       ├── 架构者.md                # /web-dev-team:架构者
-│       ├── 执行者.md                # /web-dev-team:执行者
-│       └── 审查员.md                # /web-dev-team:审查员（调度三 sub-agent）
-├── agents/web-dev-team/             # 三个独立 sub-agent
-│   ├── 审查员-逻辑审查.md
-│   ├── 审查员-现有影响审查.md
-│   └── 审查员-需求复审.md
-├── hooks/web-dev-team/              # PreToolUse hook
-│   ├── path-guard.sh                # 阻断写入 .claude/ 和别 team 目录
-│   └── spec-required.sh             # 多文件改动无 spec 时提醒
-├── templates/web-dev-team/
-│   └── spec-template.md             # spec 八节模板（运行拓扑节按需出现）
-└── .fragments/web-dev-team.json     # hook + permissions 片段（合成进 settings.json）
-
-__ai__/web-dev-team/                 # 你的产物（删除 team 时保留）
-└── specs/
-    └── YYYYMMDD_<slug>.md           # 架构者写的 spec
+<你的项目>/
+├── .claude/
+│   ├── commands/
+│   │   ├── web-dev-team.md              # /web-dev-team 入口（全流程调度）
+│   │   └── web-dev-team/
+│   │       ├── 架构者.md                # /web-dev-team:架构者
+│   │       ├── 执行者.md                # /web-dev-team:执行者
+│   │       └── 审查员.md                # /web-dev-team:审查员（调度三 sub-agent）
+│   ├── agents/web-dev-team/             # 三个独立 sub-agent
+│   │   ├── 审查员-逻辑审查.md
+│   │   ├── 审查员-现有影响审查.md
+│   │   └── 审查员-需求复审.md
+│   ├── hooks/web-dev-team/              # PreToolUse hook
+│   │   ├── path-guard.sh                # 阻断 sub-agent 写入 .claude/
+│   │   └── spec-required.sh             # 多文件改动无 spec 时提醒
+│   ├── templates/web-dev-team/
+│   │   └── spec-template.md             # spec 八节模板（运行拓扑节按需出现）
+│   └── .fragments/web-dev-team.json     # hook + permissions 片段（合成进 settings.json）
+│
+└── __ai__/
+    └── web-dev-team/                    # 你的产物（删除 team 时保留）
+        └── specs/
+            └── YYYYMMDD_<slug>.md       # 架构者写的 spec
 ```
 

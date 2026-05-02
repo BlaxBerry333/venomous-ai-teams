@@ -44,25 +44,27 @@ bash setup.sh   # interactive: install / remove + team + target project
 ### Layout after install (in your project)
 
 ```
-.claude/
-├── commands/
-│   ├── web-dev-team.md              # /web-dev-team entry (full-flow orchestrator)
-│   └── web-dev-team/
-│       ├── 架构者.md                # /web-dev-team:架构者
-│       ├── 执行者.md                # /web-dev-team:执行者
-│       └── 审查员.md                # /web-dev-team:审查员 (orchestrates 3 sub-agents)
-├── agents/web-dev-team/             # Three independent sub-agents
-│   ├── 审查员-逻辑审查.md
-│   ├── 审查员-现有影响审查.md
-│   └── 审查员-需求复审.md
-├── hooks/web-dev-team/              # PreToolUse hooks
-│   ├── path-guard.sh                # Blocks writes to .claude/ and other-team dirs
-│   └── spec-required.sh             # Warns on multi-file changes without a spec
-├── templates/web-dev-team/
-│   └── spec-template.md             # Spec 8-section template (runtime-topology section is conditional)
-└── .fragments/web-dev-team.json     # hooks + permissions fragment (merged into settings.json)
-
-__ai__/web-dev-team/                 # Your artifacts (preserved on team removal)
-└── specs/
-    └── YYYYMMDD_<slug>.md           # Specs written by the architect
+<your project>/
+├── .claude/
+│   ├── commands/
+│   │   ├── web-dev-team.md              # /web-dev-team entry (full-flow orchestrator)
+│   │   └── web-dev-team/
+│   │       ├── 架构者.md                # /web-dev-team:架构者
+│   │       ├── 执行者.md                # /web-dev-team:执行者
+│   │       └── 审查员.md                # /web-dev-team:审查员 (orchestrates 3 sub-agents)
+│   ├── agents/web-dev-team/             # Three independent sub-agents
+│   │   ├── 审查员-逻辑审查.md
+│   │   ├── 审查员-现有影响审查.md
+│   │   └── 审查员-需求复审.md
+│   ├── hooks/web-dev-team/              # PreToolUse hooks
+│   │   ├── path-guard.sh                # Blocks sub-agent writes to .claude/
+│   │   └── spec-required.sh             # Warns on multi-file changes without a spec
+│   ├── templates/web-dev-team/
+│   │   └── spec-template.md             # Spec 8-section template (runtime-topology section is conditional)
+│   └── .fragments/web-dev-team.json     # hooks + permissions fragment (merged into settings.json)
+│
+└── __ai__/
+    └── web-dev-team/                    # Your artifacts (preserved on team removal)
+        └── specs/
+            └── YYYYMMDD_<slug>.md       # Specs written by the architect
 ```
