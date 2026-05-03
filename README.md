@@ -11,6 +11,7 @@
 |---|---|---|
 | **web-dev-team** | web 开发 | [中文](teams/web-dev-team/README.md) · [English](teams/web-dev-team/README.en.md) · [日本語](teams/web-dev-team/README.ja.md) |
 | **doc-writing-team** | 带来源的 markdown 文档写作 | [中文](teams/doc-writing-team/README.md) · [English](teams/doc-writing-team/README.en.md) · [日本語](teams/doc-writing-team/README.ja.md) |
+| **web-design-team** | 视觉密集的品牌站 / 落地页 / 官网设计稿 + 可跑原型 | [中文](teams/web-design-team/README.md) · [English](teams/web-design-team/README.en.md) · [日本語](teams/web-design-team/README.ja.md) |
 
 ## 安装
 

@@ -6,3 +6,6 @@
 
 # 排除开发者 memo
 __memo__/** linguist-vendored
+
+# 排除 design 相关的原型模板
+teams/*/.claude/templates/** linguist-vendored

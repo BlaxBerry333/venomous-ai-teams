@@ -11,6 +11,7 @@ Install a team, and your main conversation gains that domain's "think → write 
 |---|---|---|
 | **web-dev-team** | Web dev | [中文](teams/web-dev-team/README.md) · [English](teams/web-dev-team/README.en.md) · [日本語](teams/web-dev-team/README.ja.md) |
 | **doc-writing-team** | Sourced markdown doc writing | [中文](teams/doc-writing-team/README.md) · [English](teams/doc-writing-team/README.en.md) · [日本語](teams/doc-writing-team/README.ja.md) |
+| **web-design-team** | Visually-dense brand / landing / official-site design-spec + runnable prototype | [中文](teams/web-design-team/README.md) · [English](teams/web-design-team/README.en.md) · [日本語](teams/web-design-team/README.ja.md) |
 
 ## Install
 

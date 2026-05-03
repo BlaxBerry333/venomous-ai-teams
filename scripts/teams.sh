@@ -12,6 +12,7 @@ TEAMS_RECORD_FILE="__ai__/__teams__.txt"
 TEAMS_DEFS=(
   "web-dev-team|🔨"
   "doc-writing-team|📝"
+  "web-design-team|🎨"
 )
 
 # Echo each available team name on its own line.
