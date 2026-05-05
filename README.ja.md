@@ -1,6 +1,6 @@
 # venomous-ai-teams
 
-[中文](./README.md) | [English](./README.en.md) | 日本語
+[English](./README.md) | [中文](./README.zh.md) | 日本語
 
 Claude Code のマルチロール + spec フロー + 反幻覚レビューを 1 コマンドでインストール可能な team にパッケージ化。<br/>
 team を入れると、メイン対話にその領域の「考える → 書く → 審査」パイプラインが入る。
@@ -9,9 +9,9 @@ team を入れると、メイン対話にその領域の「考える → 書く 
 
 | Team | 内容 | ドキュメント |
 |---|---|---|
-| **web-dev-team** | web 開発 | [中文](teams/web-dev-team/README.md) · [English](teams/web-dev-team/README.en.md) · [日本語](teams/web-dev-team/README.ja.md) |
-| **doc-writing-team** | 出典付き markdown ドキュメント執筆 | [中文](teams/doc-writing-team/README.md) · [English](teams/doc-writing-team/README.en.md) · [日本語](teams/doc-writing-team/README.ja.md) |
-| **web-design-team** | ビジュアル密集型ブランドサイト / LP / 公式サイトの design-spec + 実行可能プロトタイプ | [中文](teams/web-design-team/README.md) · [English](teams/web-design-team/README.en.md) · [日本語](teams/web-design-team/README.ja.md) |
+| **web-dev-team** | web 開発 | [中文](teams/web-dev-team/README.zh.md) · [English](teams/web-dev-team/README.md) · [日本語](teams/web-dev-team/README.ja.md) |
+| **doc-writing-team** | 出典付き markdown ドキュメント執筆 | [中文](teams/doc-writing-team/README.zh.md) · [English](teams/doc-writing-team/README.md) · [日本語](teams/doc-writing-team/README.ja.md) |
+| **web-design-team** | Web デザイン + プロトタイプ | [中文](teams/web-design-team/README.zh.md) · [English](teams/web-design-team/README.md) · [日本語](teams/web-design-team/README.ja.md) |
 
 ## インストール
 

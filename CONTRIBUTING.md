@@ -1,69 +1,69 @@
-# 贡献指南
+# Contributing
 
-中文 | [English](./CONTRIBUTING.en.md) | [日本語](./CONTRIBUTING.ja.md)
+[中文](./CONTRIBUTING.zh.md) | English | [日本語](./CONTRIBUTING.ja.md)
 
-## 上手
+## Getting started
 
 ```bash
 git clone https://github.com/BlaxBerry333/venomous-ai-teams.git
 cd venomous-ai-teams
 
-# 必读
-cat .claude/CLAUDE.md           # 框架开发规范（≤ 40 行硬规）
-cat __memo__/README.md          # 跨会话开发记忆机制
+# Required reading
+cat .claude/CLAUDE.md           # Framework dev rules (≤ 40-line hard limit)
+cat __memo__/README.md          # Cross-session memory mechanism
 ```
 
-## 仓库结构
+## Repo layout
 
 ```
 venomous-ai-teams/
-├── setup.sh                    # 安装入口（交互式）
-├── scripts/                    # setup.sh 拆分模块
+├── setup.sh                    # Install entry (interactive)
+├── scripts/                    # setup.sh modules
 │   ├── install.sh
 │   ├── remove.sh
-│   ├── settings.sh             # fragments → settings.json 合成
-│   ├── platform.sh             # 环境检查（bash / jq / gum）
-│   ├── safety.sh               # 路径安全
-│   ├── teams.sh                # team 注册表
-│   └── ui.sh                   # gum 交互
-├── teams/                      # 各 team 包（装到用户项目的产物）
+│   ├── settings.sh             # fragments → settings.json merger
+│   ├── platform.sh             # Env checks (bash / jq / gum)
+│   ├── safety.sh               # Path safety
+│   ├── teams.sh                # Team registry
+│   └── ui.sh                   # gum interactive UI
+├── teams/                      # Each team pack (artifacts installed into user projects)
 │   └── <team>/
-│       ├── README.md           # team 说明（4 段：定位/命令/工作流/删除）
-│       ├── README.en.md
+│       ├── README.md           # Team docs (4 sections: positioning / commands / workflow / removal)
+│       ├── README.zh.md
 │       ├── README.ja.md
-│       └── .claude/            # 1:1 镜像到用户项目的 .claude/
-│           ├── commands/<team>/        # slash command
-│           ├── agents/<team>/          # 独立 sub-agent
-│           ├── hooks/<team>/           # bash hook 脚本
-│           ├── templates/<team>/       # 模板文件
-│           └── .fragments/<team>.json  # hook + permissions 片段（合成进 settings.json）
-├── .claude/                    # 本仓库自身的 Claude Code 配置（开发框架时用，不会装到用户）
-│   ├── CLAUDE.md               # 框架开发规范（≤ 40 行硬规）
+│       └── .claude/            # Mirrored 1:1 into user's .claude/
+│           ├── commands/<team>/        # Slash commands
+│           ├── agents/<team>/          # Independent sub-agents
+│           ├── hooks/<team>/           # bash hook scripts
+│           ├── templates/<team>/       # Template files
+│           └── .fragments/<team>.json  # hook + permissions fragment (merged into settings.json)
+├── .claude/                    # This repo's own Claude Code config (for framework dev, not installed to users)
+│   ├── CLAUDE.md               # Framework dev rules (≤ 40-line hard limit)
 │   ├── settings.json
 │   ├── agents/
-│   │   └── 开发审查员.md       # 反向挑刺 sub-agent（开发新 team 时强制 spawn，跟产物 team 的审查员区分）
+│   │   └── 开发审查员.md       # Adversarial review sub-agent (must spawn when developing new teams; distinct from team-product reviewers)
 │   └── hooks/
-│       └── load-memo.sh        # SessionStart 注入 status: 进行中 的 memo 挂账
-├── __memo__/                   # 跨会话架构决定 / 踩坑教训（gitignore，README 除外）
-│   ├── README.md               # memo 写作规范
-│   └── YYYYMMDD_xxx.md         # 各项 memo（开发者本地）
-└── __playground__/             # team 实跑测试场（fake app + 生成的 spec，gitignore）
+│       └── load-memo.sh        # SessionStart injection of `status: 进行中` memo todos
+├── __memo__/                   # Cross-session architecture decisions / lessons (gitignored except README)
+│   ├── README.md               # Memo writing conventions
+│   └── YYYYMMDD_xxx.md         # Individual memos (developer-local)
+└── __playground__/             # Team test ground (fake app + generated specs, gitignored)
 ```
 
-## 开发新 team 的最小流程
+## Minimum flow to build a new team
 
-1. 读 `__memo__/20260429_team公共规范.md`（公共规范，硬规）
-2. 在 `teams/<your-team>/` 下镜像 `.claude/` 结构
-3. 写 prompt 文件遵守行数硬规（架构者 ≤ 50 / 执行者 ≤ 35 / sub-agent ≤ 60 / slash command ≤ 80）
-4. 写 `.fragments/<team>.json`（hook + permissions 片段）
-5. 实跑测试：`bash setup.sh` 装到 `__playground__/<fake-app>/` 跑真实场景
-6. 改完后宣告完成前 spawn `.claude/agents/开发审查员.md` 至少 2 个独立实例都零发现才算通过
+1. Read `__memo__/20260429_team公共规范.md` (shared conventions, hard rules)
+2. Mirror the `.claude/` structure under `teams/<your-team>/`
+3. Write prompts under hard line limits (architect ≤ 50 / executor ≤ 35 / sub-agent ≤ 60 / slash command ≤ 80)
+4. Write `.fragments/<team>.json` (hook + permissions fragment)
+5. Live test: `bash setup.sh` install to `__playground__/<fake-app>/` and run real scenarios
+6. Before declaring done, spawn `.claude/agents/开发审查员.md` — at least 2 independent instances must report zero findings
 
-## 关键约束
+## Key constraints
 
-- 改 `.claude/{agents,commands,hooks}/`、`teams/*/.claude/{agents,commands,hooks,settings.json}`、`setup.sh` → 必须 spawn 开发审查员（见 `.claude/CLAUDE.md`）
-- 不改 `__memo__/` 内已 `status: 已定稿` 的 memo（除非真有错）
-- commit 不带 `Co-Authored-By: Claude` 等 AI 署名
-- bash 脚本兼容 macOS bash 3.2+（禁 `mapfile` / `declare -A` / `\s\d\w` 等）
+- Editing `.claude/{agents,commands,hooks}/`, `teams/*/.claude/{agents,commands,hooks,settings.json}`, or `setup.sh` → MUST spawn 开发审查员 (see `.claude/CLAUDE.md`)
+- Don't edit `__memo__/` files marked `status: 已定稿` (unless they're actually wrong)
+- Commits must NOT include `Co-Authored-By: Claude` or other AI signatures
+- bash scripts must be compatible with macOS bash 3.2+ (no `mapfile` / `declare -A` / `\s\d\w` etc.)
 
-详见 `.claude/CLAUDE.md`。
+See `.claude/CLAUDE.md` for details.

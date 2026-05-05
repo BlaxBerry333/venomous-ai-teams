@@ -1,25 +1,25 @@
-# 本仓库开发记忆
+# Repo Dev Memory
 
-中文 | [English](./README.en.md) | [日本語](./README.ja.md)
+[中文](./README.zh.md) | English | [日本語](./README.ja.md)
 
-跨会话的开发者记忆。新会话靠读这里 + git log 接续上下文，不靠对话历史。
+Cross-session developer memory. New sessions resume context by reading here + `git log`, not chat history.
 
-## 文件命名
+## File naming
 
-- `YYYYMMDD_中文简短描述.md`，如 `20260429_架构定稿.md`
+- `YYYYMMDD_短い英語または中文描述.md`, e.g. `20260429_架构定稿.md`
 
-## 写作纪律
+## Writing discipline
 
-- 长度自由（不进 LLM 上下文，无 token 成本），但只写非废话
-- 必须 frontmatter `status:`（中文，无引号），4 种值：
-  - `进行中` — 含未完成挂账；**SessionStart hook 自动注入未勾的 `- [ ]` 项到对话**
-  - `已定稿` — 设计文档完成、规则定下，有永久参考价值（如架构定稿、公共规范）
-  - `已完结` — 一次性事件结束（如某次踩坑、某次审查）
-  - `暂存` — 故意搁置等真实痛点反馈再决定（如"暂未实现清单"）
-- 只写**下次不读这个就接不上**的东西：架构决定、踩坑教训、判断依据
-- 不写 git log 能查到的东西，只写 **why**
-- 列表 + 短句，不准散文
+- Length-free (not in LLM context, no token cost), but no fluff
+- Required frontmatter `status:` (Chinese, no quotes), 4 values:
+  - `进行中` — has open todos; **SessionStart hook auto-injects unchecked `- [ ]` items into the conversation**
+  - `已定稿` — design doc finalized, rules set, has lasting reference value (e.g. architecture lock, shared conventions)
+  - `已完结` — one-off event done (e.g. a specific stumble, a specific review)
+  - `暂存` — intentionally parked, waiting for real-world pain to decide (e.g. "deferred features list")
+- Only write what's **unrecoverable without this memo**: architecture decisions, stumble lessons, judgment basis
+- Don't write what `git log` can answer; write **why**
+- Lists + short sentences, no prose
 
-## 结构
+## Structure
 
-无硬模板。开头一句话定位为什么这个 memo 存在；中间章节自由；含挂账时用 `## 本轮挂账` + `- [ ]` / `- [x]` checkbox。
+No hard template. One opening line stating why this memo exists; middle sections free-form; for open todos use `## 本轮挂账` + `- [ ]` / `- [x]` checkboxes.

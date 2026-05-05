@@ -1,6 +1,6 @@
 # 本リポジトリ開発メモ
 
-[中文](./README.md) | [English](./README.en.md) | 日本語
+[English](./README.md) | [中文](./README.zh.md) | 日本語
 
 セッションを跨ぐ開発者メモ。新セッションはここを読む + `git log` で文脈を引き継ぐ、対話履歴に頼らない。
 

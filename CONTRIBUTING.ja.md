@@ -1,6 +1,6 @@
 # 貢献ガイド
 
-[中文](./CONTRIBUTING.md) | [English](./CONTRIBUTING.en.md) | 日本語
+[English](./CONTRIBUTING.md) | [中文](./CONTRIBUTING.zh.md) | 日本語
 
 ## はじめに
 
@@ -10,7 +10,7 @@ cd venomous-ai-teams
 
 # 必読
 cat .claude/CLAUDE.md           # フレームワーク開発規範（≤ 40 行ハード制限）
-cat __memo__/README.md          # セッション跨ぎ記憶メカニズム
+cat __memo__/README.ja.md       # セッション跨ぎ記憶メカニズム
 ```
 
 ## リポジトリ構成
@@ -29,7 +29,7 @@ venomous-ai-teams/
 ├── teams/                      # 各 team パック（ユーザープロジェクトに入る成果物）
 │   └── <team>/
 │       ├── README.md           # team ドキュメント（4 セクション：定位/コマンド/ワークフロー/削除）
-│       ├── README.en.md
+│       ├── README.zh.md
 │       ├── README.ja.md
 │       └── .claude/            # ユーザーの .claude/ に 1:1 ミラー
 │           ├── commands/<team>/        # slash command

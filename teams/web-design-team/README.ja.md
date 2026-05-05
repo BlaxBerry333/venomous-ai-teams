@@ -1,6 +1,6 @@
 # web-design-team
 
-[中文](./README.md) | [English](./README.en.md) | 日本語
+[English](./README.md) | [中文](./README.zh.md) | 日本語
 
 ## 概要
 

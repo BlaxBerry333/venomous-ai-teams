@@ -1,109 +1,109 @@
 # web-design-team
 
-中文 | [English](./README.en.md) | [日本語](./README.ja.md)
+[中文](./README.zh.md) | English | [日本語](./README.ja.md)
 
-## 是什么
+## What it is
 
-逼 Claude 在品牌站 / 落地页 / 官网类视觉密集任务上**先参数化设计再实现**：拆解者扒参考站（给了 URL 才跑，没给就从零设计）、设计师出 design-spec、执行者搭可跑原型、3 个 sub-agent 并审。**只产设计稿 + 原型，不接业务数据**。
+Forces Claude on visually-dense brand sites / landing pages / official sites to **parametrize the design before building**: a dissector scrapes the reference (only when a URL is given — otherwise designs from scratch), a designer emits the design-spec, an executor scaffolds a runnable prototype, 3 sub-agents review in parallel. **Output is design-spec + prototype only — no business data wiring.**
 
-## 工作流 + 特点
+## Workflow + features
 
-`/web-design-team <需求 + 参考站 URL>` → 拆参考站（有 URL 才跑）→ 设计师出 spec + 5 列汇报表 → 你回 OK → 执行者搭原型 → 3 个 sub-agent 并审 → 修。
+`/web-design-team <request + reference URL>` → dissect reference (only when a URL is given) → designer emits spec + 5-column report table → you reply OK → executor scaffolds prototype → 3 sub-agents review in parallel → fixes.
 
-- **参考站逆向拆解**：动效手法 / 资产 / 复刻难度都从抓帧扒出来，不靠看截图猜
-- **动效参数化**：duration / easing / 触发 / 起止四件套必填，"流畅自然"这类虚词被禁
-- **占位可下游对接**：spec §5 给真品规格 + 替换路径，下游（web-dev-team / 真人前端）直接接
-- **真独立审查**：还原度 / 性能 / 可访问性 3 个 sub-agent 各自上下文，不是 LLM 自审
+- **Reference reverse-engineering**: animation techniques / assets / replication difficulty are pulled from real frame captures, not guessed from screenshots
+- **Parametric animation**: duration / easing / trigger / start-end states are mandatory — fluff like "smooth and natural" is banned
+- **Downstream-friendly placeholders**: spec §5 gives real-asset specs + replacement paths so downstream (web-dev-team / human frontend) plugs straight in
+- **Truly independent review**: fidelity / performance / a11y run in 3 separate sub-agent contexts, not LLM self-review
 
-## 角色
+## Roles
 
-| 角色 | 干啥 | 不干啥 |
+| Role | Does | Doesn't do |
 |---|---|---|
-| **参考拆解者** | 扒参考站技术栈 + 资产 + 动效清单 → 落 refs/ | 不设计、不写代码 |
-| **设计师** | 出 design-spec（分区/组件/动效参数/资产清单/性能预算）+ 5 列汇报表 | 不写代码 |
-| **执行者** | 拷模板 + 按 spec 搭可跑原型（默认 React+Vite+framer-motion 轻装；r3f / gsap / lucide 由 spec §8 声明时按需加） | 不动 spec、不联网下真资产 |
-| **审查员** | 调度 3 个 sub-agent 正交并审（还原度 / 性能 / 可访问性） | 不写代码、不改 spec |
+| **参考拆解者** (Dissector) | Scrapes reference: tech stack + assets + animation list → writes refs/ | No design, no code |
+| **设计师** (Designer) | Emits design-spec (sections / components / params / assets / perf budget) + 5-col report table | No code |
+| **执行者** (Executor) | Copies skeleton + builds runnable prototype (default lean React+Vite+framer-motion; r3f / gsap / lucide added on demand when spec §8 declares them) | No spec edits, no real-asset downloads |
+| **审查员** (Reviewer) | Orchestrates 3 sub-agents in parallel (fidelity / performance / a11y) | No code, no spec edits |
 
-## 对比第三方（数据 2026-05）
+## vs. third-party (data: 2026-05)
 
-| 维度 | web-design-team | v0.dev | Galileo AI | Framer AI |
+| Dimension | web-design-team | v0.dev | Galileo AI | Framer AI |
 |---|:---:|:---:|:---:|:---:|
-| 参考站逆向拆解 | ✅<br/>WebFetch / Playwright | ❌ | ❌ | ❌ |
-| 3D / WebGL 原型 | ✅<br/>r3f + drei | ⚠️<br/>有限 | ❌ | ⚠️<br/>受限 |
-| 动效参数化设计稿 | ✅<br/>含 easing/duration/触发 | ❌<br/>只产代码 | ❌ | ⚠️ |
-| 设计稿可下游对接 | ✅<br/>md 结构化 | ❌ | ❌ | ❌<br/>锁平台 |
-| 占位资产清单 | ✅<br/>含真品规格 + 替换路径 | ❌ | ❌ | ❌ |
-| 3 个 sub-agent 独立审查 | ✅<br/>还原度/性能/a11y | ❌ | ❌ | ❌ |
-| 平台 | Claude Code | SaaS | SaaS | SaaS |
-| 单次中等需求成本 * | $0.5-2.5 | $20/月起 | $19/月起 | $15/月起 |
+| Reference reverse-engineering | ✅<br/>WebFetch / Playwright | ❌ | ❌ | ❌ |
+| 3D / WebGL prototype | ✅<br/>r3f + drei | ⚠️<br/>limited | ❌ | ⚠️<br/>limited |
+| Parametric animation spec | ✅<br/>easing/duration/trigger | ❌<br/>code-only | ❌ | ⚠️ |
+| Downstream-portable spec | ✅<br/>structured md | ❌ | ❌ | ❌<br/>platform-locked |
+| Placeholder asset list | ✅<br/>real specs + replace paths | ❌ | ❌ | ❌ |
+| 3 sub-agents independent review | ✅<br/>fidelity / perf / a11y | ❌ | ❌ | ❌ |
+| Platform | Claude Code | SaaS | SaaS | SaaS |
+| Cost per medium task * | $0.5-2.5 | $20/mo+ | $19/mo+ | $15/mo+ |
 
-\* 估算，含设计师 + 执行者 + 3 个 sub-agent 并审；实际取决于动效复杂度 + 模型 + 是否走全流程，简单页可低至 $0.2，重 3D + 多轮修复可达 $4+。
+\* Estimate. Covers designer + executor + 3 sub-agents in parallel. Actual cost depends on motion complexity, model choice, and whether the full pipeline runs — simple pages may go as low as $0.2; heavy 3D with multiple fix rounds can hit $4+.
 
-## 使用
+## Usage
 
-### 安装/删除
+### Install / Remove
 
 ```bash
-bash setup.sh   # 交互式选 install / remove + team + 目标项目
+bash setup.sh   # interactive: install / remove + team + target project
 ```
 
-### 命令
+### Commands
 
-| 命令 | 干啥 |
+| Command | What it does |
 |---|---|
-| `/web-design-team <需求>` | 全流程<br/>参考拆解（如有 URL）→ 设计师 → 用户确认 → 执行者 → 3 个 sub-agent 并审（≤ 3 轮修复闭环） |
-| `/web-design-team:参考拆解 <URL>` | 单跑参考拆解者<br/>产 `refs/<YYYYMMDD_slug>/analysis.md` |
-| `/web-design-team:设计师 <需求>` | 单跑设计师<br/>产 `designs/<YYYYMMDD_slug>/design-spec.md` |
-| `/web-design-team:执行者 <design-spec 路径>` | 单跑执行者<br/>按 spec 搭原型，**完工前必须 tsc + vite build 通过** |
-| `/web-design-team:审查员 <design-spec 路径>` | 审指定 design<br/>≥2 份 design 时强制带参；唯一 1 份可省略 |
+| `/web-design-team <request>` | Full flow<br/>dissector (if URL) → designer → user OK → executor → 3 sub-agents review (≤ 3 fix rounds) |
+| `/web-design-team:参考拆解 <URL>` | Dissector only<br/>emits `refs/<YYYYMMDD_slug>/analysis.md` |
+| `/web-design-team:设计师 <request>` | Designer only<br/>emits `designs/<YYYYMMDD_slug>/design-spec.md` |
+| `/web-design-team:执行者 <design-spec path>` | Executor only<br/>scaffolds prototype per spec; **must pass tsc + vite build before reporting done** |
+| `/web-design-team:审查员 <design-spec path>` | Reviews specified design<br/>required when ≥2 designs exist; optional when only 1 |
 
-### 装后目录结构（你的项目里）
+### Layout after install (in your project)
 
 ```
-<你的项目>/
+<your project>/
 ├── .claude/
 │   ├── commands/
-│   │   ├── web-design-team.md            # /web-design-team 入口（全流程调度）
+│   │   ├── web-design-team.md            # /web-design-team entry (full-flow orchestrator)
 │   │   └── web-design-team/
 │   │       ├── 参考拆解.md                # /web-design-team:参考拆解
 │   │       ├── 设计师.md                  # /web-design-team:设计师
 │   │       ├── 执行者.md                  # /web-design-team:执行者
-│   │       └── 审查员.md                  # /web-design-team:审查员（调度 3 个 sub-agent）
-│   ├── agents/web-design-team/           # 三个独立 sub-agent
+│   │       └── 审查员.md                  # /web-design-team:审查员 (orchestrates 3 sub-agents)
+│   ├── agents/web-design-team/           # Three independent sub-agents
 │   │   ├── 审查员-还原度.md
 │   │   ├── 审查员-性能.md
 │   │   └── 审查员-可访问性.md
 │   ├── hooks/web-design-team/            # PreToolUse hook
-│   │   └── path-guard.sh                 # 阻断 sub-agent 写入 .claude/
+│   │   └── path-guard.sh                 # Blocks sub-agent writes to .claude/
 │   ├── templates/web-design-team/
-│   │   ├── analysis-template.md          # 参考拆解者用
-│   │   ├── design-spec-template.md       # 设计师用
-│   │   └── prototype-skeleton/           # 执行者拷贝的 Vite+React 模板
-│   └── .fragments/web-design-team.json   # hook + permissions 片段（合成进 settings.json）
+│   │   ├── analysis-template.md          # for dissector
+│   │   ├── design-spec-template.md       # for designer
+│   │   └── prototype-skeleton/           # Vite+React skeleton copied by executor
+│   └── .fragments/web-design-team.json   # hook + permissions fragment (merged into settings.json)
 │
 └── __ai__/
-    └── web-design-team/                  # 你的产物（删除 team 时保留）
-        ├── refs/<YYYYMMDD_slug>/         # 参考拆解产物
+    └── web-design-team/                  # Your artifacts (preserved on team removal)
+        ├── refs/<YYYYMMDD_slug>/         # Dissection output
         │   └── analysis.md
         └── designs/<YYYYMMDD_slug>/
-            ├── design-spec.md            # 设计师写的 spec
-            └── prototype/                # 可跑原型（npm install && npm run dev）
-                ├── README.md             # 本 design 专属说明（执行者重写，非模板默认）
-                └── placeholder-todo.md   # §5 占位资产 checklist，下游接手时勾选
+            ├── design-spec.md            # Spec written by designer
+            └── prototype/                # Runnable prototype (npm install && npm run dev)
+                ├── README.md             # design-specific README (rewritten by executor, not template default)
+                └── placeholder-todo.md   # §5 placeholder asset checklist for downstream handoff
 ```
 
-## 下游对接
+## Downstream handoff
 
-下游 team（如 web-dev-team / 真人前端）拿到 design 后：
+Downstream teams (web-dev-team / human frontends) picking up a design:
 
-1. Read `designs/<slug>/design-spec.md` 看 §2 组件树 / §3 token / §4 动效参数 / §7 性能预算
-2. Read `designs/<slug>/prototype/README.md` 看本 design 是干啥的 + 怎么跑
-3. Read `designs/<slug>/prototype/placeholder-todo.md` 逐项把占位换成真品
-4. 真品替换完 → prototype 已升级到生产可用资产；可直接迁移到目标项目栈
+1. Read `designs/<slug>/design-spec.md` for §2 component tree / §3 tokens / §4 motion params / §7 perf budget
+2. Read `designs/<slug>/prototype/README.md` for what this design does + how to run
+3. Read `designs/<slug>/prototype/placeholder-todo.md` and check items off as you swap placeholders for real assets
+4. Once all items checked → prototype is upgraded to production-ready assets; can be migrated to your target project stack
 
-> **响应式范围**：本 team 产物仅按 1024+ 桌面演示视觉与交互；移动端响应式由下游 team 按目标项目断点系统（如 Tailwind/MUI/自有栅格）适配。design-spec §7 mobile 节标了降级意图（哪些动效/3D 关或简化、hero 是否竖排）供参考，断点细节归下游。
+> **Responsive scope**: This team's outputs only demo visuals & interactions at 1024+ desktop widths. Mobile responsive adaptation is the downstream team's job, against the target project's breakpoint system (Tailwind / MUI / your own grid). Spec §7 `mobile` notes the intent (which animations/3D to drop or simplify, whether hero stacks vertically) — breakpoint details are left to downstream.
 
-## 软依赖
+## Soft dependencies
 
-- **Node.js + npm**：跑原型需要（Vite 项目）
-- **Playwright**（**强烈建议**，技术上可选）：参考拆解阶段抓滚动帧 + 动效录制；不装则降级到 WebFetch 只能拿静态 HTML，**滚动 / hover / mousemove 类动效全靠脑补**——参考拆解的核心价值废大半。装一次 `npx playwright install chromium` 即可
+- **Node.js + npm**: required to run the prototype (Vite project)
+- **Playwright** (**strongly recommended**, technically optional): captures scroll frames + animation recording during dissection. Without it, the dissector falls back to WebFetch with static HTML only — **scroll / hover / mousemove animations have to be guessed**, gutting most of the dissector's value. One-time setup: `npx playwright install chromium`
