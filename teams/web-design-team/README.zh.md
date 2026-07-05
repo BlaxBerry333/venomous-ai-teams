@@ -106,4 +106,4 @@ bash setup.sh   # 交互式选 install / remove + team + 目标项目
 ## 软依赖
 
 - **Node.js + npm**：跑原型需要（Vite 项目）
-- **Playwright**（**强烈建议**，技术上可选）：参考拆解阶段抓滚动帧 + 动效录制；不装则降级到 WebFetch 只能拿静态 HTML，**滚动 / hover / mousemove 类动效全靠脑补**——参考拆解的核心价值废大半。装一次 `npx playwright install chromium` 即可
+- **Playwright**（**强烈建议**，技术上可选）：参考拆解阶段抓首屏 HTML + 滚动帧；不装则降级到 WebFetch 只能拿静态 HTML，**滚动 / hover / mousemove 类动效全靠脑补**——参考拆解的核心价值废大半。目标项目内装一次：`npm i -D playwright && npx playwright install chromium`（拆解脚本按项目内 node_modules 解析，装全局无效）

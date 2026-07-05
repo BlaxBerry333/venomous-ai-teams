@@ -106,4 +106,4 @@ Downstream teams (web-dev-team / human frontends) picking up a design:
 ## Soft dependencies
 
 - **Node.js + npm**: required to run the prototype (Vite project)
-- **Playwright** (**strongly recommended**, technically optional): captures scroll frames + animation recording during dissection. Without it, the dissector falls back to WebFetch with static HTML only — **scroll / hover / mousemove animations have to be guessed**, gutting most of the dissector's value. One-time setup: `npx playwright install chromium`
+- **Playwright** (**strongly recommended**, technically optional): captures first-screen HTML + scroll frames during dissection. Without it, the dissector falls back to WebFetch with static HTML only — **scroll / hover / mousemove animations have to be guessed**, gutting most of the dissector's value. One-time setup inside the target project: `npm i -D playwright && npx playwright install chromium` (the dissection script resolves node_modules from the project; a global install won't work)
