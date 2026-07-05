@@ -30,7 +30,7 @@
 > 未涉及：<3 类中未涉及者，全涉及写"无"。此 `>` 行不计入 10 条上限>
 
 ## 参照点
-- <path:line> <一句>，path 用 `/` 开头表项目根相对（如 `/src/api/auth.<ext>:5`），禁未 Read 过的；无则"无"；优先看 routes / loaders / api handlers / middleware / 类型定义；涉及持久化必看 schema 定义文件 + migration 历史；涉及多服务必看容器编排配置 + 各服务启动脚本 + 队列/RPC 客户端初始化
+- <path:line> <一句>，path 写项目根相对、不带前导 `/`（如 `src/api/auth.<ext>:5`），禁未 Read 过的；无则"无"；优先看 routes / loaders / api handlers / middleware / 类型定义；涉及持久化必看 schema 定义文件 + migration 历史；涉及多服务必看容器编排配置 + 各服务启动脚本 + 队列/RPC 客户端初始化
 
 ## 假设（3 类前缀；选型=我选了什么；风险=选完仍存的不确定）
 - 推断：<用户没明说的技术细节，如"DOM 用 data-theme"、"防抖 300ms"，每条一行>

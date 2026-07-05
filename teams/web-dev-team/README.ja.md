@@ -49,7 +49,7 @@ bash setup.sh   # インタラクティブ：install / remove + team + 対象プ
 | コマンド | 内容 |
 |---|---|
 | `/web-dev-team <要望>` | フルフロー<br/>アーキテクト → ユーザー確認 → 実行者 → 3 レビュアー（≤ 3 修正ラウンド） |
-| `/web-dev-team:架构者 <要望>` | アーキテクトのみ実行<br/>`/__ai__/web-dev-team/specs/YYYYMMDD_<slug>.md` を出力 |
+| `/web-dev-team:架构者 <要望>` | アーキテクトのみ実行<br/>`__ai__/web-dev-team/specs/YYYYMMDD_<slug>.md` を出力 |
 | `/web-dev-team:执行者 <spec パスまたは生の要望>` | 実行者のみ実行<br/>spec に従ってコード変更 |
 | `/web-dev-team:审查员` | 引数なし<br/>デフォルトで未コミット git diff をレビュー |
 | `/web-dev-team:审查员 <パスまたは範囲>` | 引数あり<br/>指定したファイル / ディレクトリ / git ref をレビュー |

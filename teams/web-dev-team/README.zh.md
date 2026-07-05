@@ -49,7 +49,7 @@ bash setup.sh   # 交互式选 install / remove + team + 目标项目
 | 命令 | 干啥 |
 |---|---|
 | `/web-dev-team <需求>` | 全流程<br/>架构者 → 用户确认 → 执行者 → 三审查员（≤ 3 轮修复闭环） |
-| `/web-dev-team:架构者 <需求>` | 单跑架构者<br/>产 `/__ai__/web-dev-team/specs/YYYYMMDD_<slug>.md` |
+| `/web-dev-team:架构者 <需求>` | 单跑架构者<br/>产 `__ai__/web-dev-team/specs/YYYYMMDD_<slug>.md` |
 | `/web-dev-team:执行者 <spec路径或裸需求>` | 单跑执行者<br/>照 spec 改代码 |
 | `/web-dev-team:审查员` | 无参数<br/>默认审 git diff 未提交改动 |
 | `/web-dev-team:审查员 <路径或范围>` | 带参数<br/>审指定文件/目录/git ref |

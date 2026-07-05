@@ -49,7 +49,7 @@ bash setup.sh   # interactive: install / remove + team + target project
 | Command | What it does |
 |---|---|
 | `/web-dev-team <request>` | Full flow<br/>architect → user OK → executor → 3 reviewers (≤ 3 fix rounds) |
-| `/web-dev-team:架构者 <request>` | Architect only<br/>emits `/__ai__/web-dev-team/specs/YYYYMMDD_<slug>.md` |
+| `/web-dev-team:架构者 <request>` | Architect only<br/>emits `__ai__/web-dev-team/specs/YYYYMMDD_<slug>.md` |
 | `/web-dev-team:执行者 <spec path or raw request>` | Executor only<br/>codes per spec |
 | `/web-dev-team:审查员` | No args<br/>defaults to reviewing uncommitted git diff |
 | `/web-dev-team:审查员 <path or scope>` | With args<br/>reviews given file / dir / git ref |
