@@ -11,6 +11,13 @@
 # User-authored hooks/permissions belong in .claude/settings.local.json (Claude Code's
 # native user-override file), which this framework never touches.
 #
+# User-data guard: entries in the existing hooks/permissions that neither the rebuilt
+# result nor any fragment shipped by this framework accounts for would be silently
+# lost by the rebuild — those are shown and require confirmation before merging
+# (pre-merge file kept as settings.json.bak.<timestamp> on confirm). Framework-owned
+# entries (any team's fragment, installed here or not) drop silently — that is the
+# normal remove/reinstall path, not user data.
+#
 # On any failure: restore .bak and exit 2.
 
 fn_settings_merge() {
@@ -80,6 +87,83 @@ fn_settings_merge() {
     rm -f "$tmp" "$base_tmp"
     fn_safety_restore_settings "$target"
     exit 2
+  fi
+
+  # -------- user-data guard (see header) --------
+  # lost = old hooks/permissions − rebuilt result − everything any framework
+  # fragment could have contributed. Non-empty lost = user-authored entries the
+  # rebuild would silently destroy.
+  local lost="" diff_rc=0
+  if [ -f "$out" ]; then
+    local known_tmp="$claude_dir/.settings.known.$$"
+    local known_base="$claude_dir/.settings.knownbase.$$"
+    local known_frags=() kf
+    for kf in "$SCRIPT_DIR"/teams/*/.claude/.fragments/*.json; do
+      [ -f "$kf" ] && known_frags+=("$kf")
+    done
+    printf '{}' > "$known_base"
+    # Fallback to {} on any failure: unknown fragments only ever WIDEN the
+    # warning (never cause silent loss), so degrading here is safe.
+    if [ "${#known_frags[@]}" -eq 0 ] \
+      || ! jq -s "$filter" "$known_base" "${known_frags[@]}" > "$known_tmp" 2>/dev/null; then
+      printf '{}' > "$known_tmp"
+    fi
+
+    local diff_filter='
+      def sub_arr($a; $b; $c): (($a // []) - ($b // []) - ($c // []));
+      def lost_hooks($o; $n; $k):
+        ($o.hooks // {}) | to_entries
+        | map((.value = sub_arr(.value; ($n.hooks // {})[.key]; ($k.hooks // {})[.key]))
+              | select((.value | length) > 0))
+        | from_entries;
+      def lost_perms($o; $n; $k):
+        ($o.permissions // {}) | to_entries
+        | map(. as $e
+              | (if ($e.key == "allow" or $e.key == "deny")
+                 then ($e | .value = sub_arr($e.value; ($n.permissions // {})[$e.key]; ($k.permissions // {})[$e.key]))
+                 elif ((($n.permissions // {}) | has($e.key)) and (($n.permissions // {})[$e.key] == $e.value))
+                 then ($e | .value = [])
+                 else $e end)
+              | select(if (.value | type) == "array" then (.value | length) > 0 else true end))
+        | from_entries;
+      { hooks: lost_hooks($old[0]; $new[0]; $known[0]),
+        permissions: lost_perms($old[0]; $new[0]; $known[0]) }
+      | if ((.hooks | length) == 0) and ((.permissions | length) == 0) then empty else . end
+    '
+    set +e
+    lost=$(jq -n --slurpfile old "$out" --slurpfile new "$tmp" --slurpfile known "$known_tmp" "$diff_filter" 2>/dev/null)
+    diff_rc=$?
+    set -e
+    rm -f "$known_tmp" "$known_base"
+  fi
+
+  if [ "$diff_rc" -ne 0 ] || [ -n "$lost" ]; then
+    if [ "$diff_rc" -ne 0 ]; then
+      fn_ui_warn "cannot verify existing hooks/permissions (unexpected shape) — merge rebuilds them from fragments"
+    else
+      fn_ui_warn "settings.json has hooks/permissions entries no framework team provides — merge will DROP:"
+      local lost_line
+      while IFS= read -r lost_line; do
+        fn_ui_line "    $lost_line"
+      done <<EOF
+$lost
+EOF
+    fi
+    fn_ui_lines \
+      "  hooks/permissions in settings.json are framework-managed (rebuilt on every merge)." \
+      "  Personal config belongs in .claude/settings.local.json — this tool never touches it."
+    if ! fn_ui_confirm "Discard the entries above and continue?"; then
+      rm -f "$tmp" "$base_tmp"
+      fn_safety_restore_settings "$target"
+      fn_ui_lines \
+        "settings.json left unchanged (team files were already updated)." \
+        "Move your entries to .claude/settings.local.json, then re-run setup.sh to finish."
+      fn_ui_cancelled
+      exit 0
+    fi
+    local keep="$claude_dir/settings.json.bak.$(date +%Y%m%d%H%M%S)"
+    cp "$out" "$keep"
+    fn_ui_ok "pre-merge settings kept (${keep#"$target"/})"
   fi
 
   mv "$tmp" "$out"
