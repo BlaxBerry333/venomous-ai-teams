@@ -9,7 +9,7 @@ git clone https://github.com/BlaxBerry333/venomous-ai-teams.git
 cd venomous-ai-teams
 
 # 必读
-cat .claude/CLAUDE.md           # 框架开发规范（≤ 40 行硬规）
+cat .claude/CLAUDE.md           # 框架开发规范（≤ 50 行硬规）
 cat __memo__/README.zh.md       # 跨会话开发记忆机制
 ```
 
@@ -26,6 +26,7 @@ venomous-ai-teams/
 │   ├── safety.sh               # 路径安全
 │   ├── teams.sh                # team 注册表
 │   └── ui.sh                   # gum 交互
+├── docs/                       # 公共规范等贡献者文档（git 跟踪）
 ├── teams/                      # 各 team 包（装到用户项目的产物）
 │   └── <team>/
 │       ├── README.md           # team 说明（4 段：定位/命令/工作流/删除）
@@ -38,7 +39,7 @@ venomous-ai-teams/
 │           ├── templates/<team>/       # 模板文件
 │           └── .fragments/<team>.json  # hook + permissions 片段（合成进 settings.json）
 ├── .claude/                    # 本仓库自身的 Claude Code 配置（开发框架时用，不会装到用户）
-│   ├── CLAUDE.md               # 框架开发规范（≤ 40 行硬规）
+│   ├── CLAUDE.md               # 框架开发规范（≤ 50 行硬规）
 │   ├── settings.json
 │   ├── agents/
 │   │   └── 开发审查员.md       # 反向挑刺 sub-agent（开发新 team 时强制 spawn，跟产物 team 的审查员区分）
@@ -52,7 +53,7 @@ venomous-ai-teams/
 
 ## 开发新 team 的最小流程
 
-1. 读 `__memo__/20260429_team公共规范.md`（公共规范，硬规）
+1. 读 `docs/team-spec.zh.md`（公共规范，硬规）
 2. 在 `teams/<your-team>/` 下镜像 `.claude/` 结构
 3. 写 prompt 文件遵守行数硬规（架构者 ≤ 50 / 执行者 ≤ 35 / sub-agent ≤ 60 / slash command ≤ 80）
 4. 写 `.fragments/<team>.json`（hook + permissions 片段）

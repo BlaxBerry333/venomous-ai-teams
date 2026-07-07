@@ -9,7 +9,7 @@ git clone https://github.com/BlaxBerry333/venomous-ai-teams.git
 cd venomous-ai-teams
 
 # 必読
-cat .claude/CLAUDE.md           # フレームワーク開発規範（≤ 40 行ハード制限）
+cat .claude/CLAUDE.md           # フレームワーク開発規範（≤ 50 行ハード制限）
 cat __memo__/README.ja.md       # セッション跨ぎ記憶メカニズム
 ```
 
@@ -26,6 +26,7 @@ venomous-ai-teams/
 │   ├── safety.sh               # パス安全性
 │   ├── teams.sh                # team レジストリ
 │   └── ui.sh                   # gum インタラクティブ UI
+├── docs/                       # 貢献者向けドキュメント（team 共通規約等、git 管理）
 ├── teams/                      # 各 team パック（ユーザープロジェクトに入る成果物）
 │   └── <team>/
 │       ├── README.md           # team ドキュメント（4 セクション：定位/コマンド/ワークフロー/削除）
@@ -38,7 +39,7 @@ venomous-ai-teams/
 │           ├── templates/<team>/       # テンプレート
 │           └── .fragments/<team>.json  # hook + permissions フラグメント（settings.json に合成）
 ├── .claude/                    # 本リポジトリ自身の Claude Code 設定（フレームワーク開発用、ユーザーには入らない）
-│   ├── CLAUDE.md               # フレームワーク開発規範（≤ 40 行ハード制限）
+│   ├── CLAUDE.md               # フレームワーク開発規範（≤ 50 行ハード制限）
 │   ├── settings.json
 │   ├── agents/
 │   │   └── 开发审查员.md       # 反対挑刺 sub-agent（新 team 開発時に必須 spawn、team 成果物の审查员と区別）
@@ -52,7 +53,7 @@ venomous-ai-teams/
 
 ## 新しい team を作る最小フロー
 
-1. `__memo__/20260429_team公共规范.md`（共通規範、ハードルール）を読む
+1. `docs/team-spec.ja.md`（共通規約、ハードルール）を読む
 2. `teams/<your-team>/` 配下に `.claude/` 構造をミラー
 3. prompt ファイルは行数ハード制限を守る（架构者 ≤ 50 / 执行者 ≤ 35 / sub-agent ≤ 60 / slash command ≤ 80）
 4. `.fragments/<team>.json`（hook + permissions フラグメント）を書く

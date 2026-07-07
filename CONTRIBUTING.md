@@ -9,7 +9,7 @@ git clone https://github.com/BlaxBerry333/venomous-ai-teams.git
 cd venomous-ai-teams
 
 # Required reading
-cat .claude/CLAUDE.md           # Framework dev rules (≤ 40-line hard limit)
+cat .claude/CLAUDE.md           # Framework dev rules (≤ 50-line hard limit)
 cat __memo__/README.md          # Cross-session memory mechanism
 ```
 
@@ -26,6 +26,7 @@ venomous-ai-teams/
 │   ├── safety.sh               # Path safety
 │   ├── teams.sh                # Team registry
 │   └── ui.sh                   # gum interactive UI
+├── docs/                       # Contributor docs incl. team spec (git-tracked)
 ├── teams/                      # Each team pack (artifacts installed into user projects)
 │   └── <team>/
 │       ├── README.md           # Team docs (4 sections: positioning / commands / workflow / removal)
@@ -38,7 +39,7 @@ venomous-ai-teams/
 │           ├── templates/<team>/       # Template files
 │           └── .fragments/<team>.json  # hook + permissions fragment (merged into settings.json)
 ├── .claude/                    # This repo's own Claude Code config (for framework dev, not installed to users)
-│   ├── CLAUDE.md               # Framework dev rules (≤ 40-line hard limit)
+│   ├── CLAUDE.md               # Framework dev rules (≤ 50-line hard limit)
 │   ├── settings.json
 │   ├── agents/
 │   │   └── 开发审查员.md       # Adversarial review sub-agent (must spawn when developing new teams; distinct from team-product reviewers)
@@ -52,7 +53,7 @@ venomous-ai-teams/
 
 ## Minimum flow to build a new team
 
-1. Read `__memo__/20260429_team公共规范.md` (shared conventions, hard rules)
+1. Read `docs/team-spec.md` (shared conventions, hard rules)
 2. Mirror the `.claude/` structure under `teams/<your-team>/`
 3. Write prompts under hard line limits (architect ≤ 50 / executor ≤ 35 / sub-agent ≤ 60 / slash command ≤ 80)
 4. Write `.fragments/<team>.json` (hook + permissions fragment)
