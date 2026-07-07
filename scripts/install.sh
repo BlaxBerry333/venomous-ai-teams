@@ -11,7 +11,10 @@
 #   teams/<team>/.claude/hooks/<team>/
 #   teams/<team>/.claude/templates/<team>/    (optional)
 #   teams/<team>/.claude/.fragments/<team>.json
-#   teams/<team>/__ai__/<team>/               (optional starter; absent → mkdir empty)
+#   teams/<team>/__ai__/<team>/               (optional starter; absent → NOT created:
+#                                              team hooks gate on this dir — "exists =
+#                                              team actually used"; commands mkdir it
+#                                              on first run)
 #
 # Failure model: reinstall stages old content as <name>.bak.<id> via mv (atomic
 # rename), copies new content INCLUDING __ai__/<team>/ skeleton, then drops the
@@ -204,33 +207,29 @@ fn_install_team() {
     fn_ui_ok ".claude/commands/$team.md"
   fi
 
-  # __ai__/<team>/ : never overwrite user work. Source dir absent → mkdir empty.
-  # Source dir present (team ships starter files) → cp -R.
-  # Failure here triggers rollback so user's original .claude/<team>/ is restored.
+  # __ai__/<team>/ : never overwrite user work; NOT pre-created when absent.
+  # Team hooks use this dir as their enable gate ("exists = team actually
+  # used at least once" — team commands mkdir it on first run). Pre-creating
+  # here would leave the gate permanently open and the hooks firing for
+  # users who installed but never used the team.
+  # Only two cases touch it: target already has it → preserve; team source
+  # ships starter files → cp -R (rollback removes on failure).
   local src_ai="$src/__ai__/$team"
-  if ! mkdir -p "$target/__ai__"; then
-    fn_ui_err "failed to create __ai__/ (permission?)"
-    _fn_install_rollback
-    exit 2
-  fi
   if [ -d "$target/__ai__/$team" ]; then
     fn_ui_warn "__ai__/$team/ exists — preserved (not overwritten)"
   elif [ -d "$src_ai" ]; then
     ai_pristine=1
+    if ! mkdir -p "$target/__ai__"; then
+      fn_ui_err "failed to create __ai__/ (permission?)"
+      _fn_install_rollback
+      exit 2
+    fi
     if ! cp -R "$src_ai" "$target/__ai__/"; then
       fn_ui_err "failed to copy __ai__/$team/ starter (disk full? permission?)"
       _fn_install_rollback
       exit 2
     fi
     fn_ui_ok "__ai__/$team/ (starter)"
-  else
-    ai_pristine=1
-    if ! mkdir -p "$target/__ai__/$team"; then
-      fn_ui_err "failed to create __ai__/$team/ (permission?)"
-      _fn_install_rollback
-      exit 2
-    fi
-    fn_ui_ok "__ai__/$team/ (created)"
   fi
 
   # All copies succeeded — commit point: drop stashed bak.

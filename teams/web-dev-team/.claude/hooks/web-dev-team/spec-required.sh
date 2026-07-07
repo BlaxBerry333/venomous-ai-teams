@@ -22,7 +22,9 @@ cat >/dev/null
 
 # 数已改动文件（含未提交 + 暂存 + 未跟踪）
 # --untracked-files=all 让 untracked 目录展开为每文件一行，否则目录级 untracked 只占 1 行会低估
-count="$({ cd "$proj" && git status --porcelain --untracked-files=all 2>/dev/null || true; } | wc -l | tr -d '[:space:]')"
+# 排除非代码路径：__ai__/（各 team 产物）、docs/（文档）、.claude/（配置）——
+# 否则他 team 落多文件或写文档时，本 hook 每次 Edit/Write 都误报（跨 team 隔离）
+count="$({ cd "$proj" && git status --porcelain --untracked-files=all 2>/dev/null | grep -vE '^.. "?(__ai__/|docs/|\.claude/)' || true; } | wc -l | tr -d '[:space:]')"
 
 # < 3 文件改动放过
 [ "${count:-0}" -lt 3 ] && exit 0
@@ -33,7 +35,13 @@ if [ -d "$specs_dir" ]; then
   [ -n "$recent" ] && exit 0
 fi
 
-# 跨 ≥3 文件 + 无近 24h spec → warn
-printf '[spec-required] 当前已改动 %s 个文件且 24h 内无 web-dev-team spec。\n' "$count" >&2
-printf '建议：用 /web-dev-team:架构者 出 spec 再继续，或 /web-dev-team <需求> 走全流程。\n' >&2
+# 每日最多提醒一次：仓库存量脏文件 ≥3 时不该每次 Edit/Write 都弹（常驻噪音）
+stamp="$team_dir/.scratch/spec-warn-stamp"
+today="$(date +%Y%m%d)"
+[ -f "$stamp" ] && [ "$(cat "$stamp" 2>/dev/null)" = "$today" ] && exit 0
+{ mkdir -p "$team_dir/.scratch" && printf '%s' "$today" > "$stamp"; } 2>/dev/null || true
+
+# 跨 ≥3 文件 + 无近 24h spec → warn（exit 1 不阻断，仅通知）
+printf '[spec-required] 当前已改动 %s 个代码文件且 24h 内无 web-dev-team spec。\n' "$count" >&2
+printf '建议：用 /web-dev-team:架构者 出 spec 再继续，或 /web-dev-team <需求> 走全流程。（今日不再重复提醒）\n' >&2
 exit 1
