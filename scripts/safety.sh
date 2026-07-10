@@ -18,13 +18,20 @@ fn_safety_check_target() {
     fn_ui_err "target directory does not exist" "$input"
     exit 1
   fi
-  if ! abs=$(cd "$input" 2>/dev/null && pwd); then
+  # pwd -P: resolve symlinks so the blacklist/self-protection checks see the
+  # physical path (a symlink into a protected dir must not pass). unset CDPATH:
+  # a user-exported CDPATH makes `cd` echo the resolved dir to stdout, which
+  # would corrupt $abs with an extra line.
+  if ! abs=$(unset CDPATH; cd -- "$input" 2>/dev/null && pwd -P); then
     fn_ui_err "cannot resolve absolute path" "$input"
     exit 1
   fi
 
+  # /private/{etc,var,tmp} : on macOS /etc /var /tmp are symlinks into
+  # /private — pwd -P above resolves them, so the physical forms must be
+  # blacklisted too or the logical entries never match.
   case "$abs" in
-    /|/Users|/home|/etc|/var|/usr|/bin|/sbin|/tmp)
+    /|/Users|/home|/etc|/var|/usr|/bin|/sbin|/tmp|/private|/private/etc|/private/var|/private/tmp|/opt|/Library)
       fn_ui_err "refuse to install into system directory" "$abs"
       exit 1
       ;;

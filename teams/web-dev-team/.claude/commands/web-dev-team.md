@@ -18,7 +18,7 @@ argument-hint: <需求描述>
 
 ## 第 1 步：架构者
 
-按 `commands/web-dev-team/架构者.md` 的步骤跑（实证 → 写 spec → 出 5 列汇报表）。
+按 `.claude/commands/web-dev-team/架构者.md` 的步骤跑（实证 → 写 spec → 出 5 列汇报表）。
 
 完成后输出汇报表 + spec 路径 + 「确认无误请回复 OK；有问题指出我改。回复 OK 后我自动接执行者 + 审查员」
 
@@ -40,13 +40,13 @@ argument-hint: <需求描述>
 
 ## 第 3 步：执行者
 
-按 `commands/web-dev-team/执行者.md` 步骤跑，参数用刚写的 spec 路径。
+按 `.claude/commands/web-dev-team/执行者.md` 步骤跑，参数用刚写的 spec 路径。
 
 完成后播报："实现完成，改动 N 个文件：<列表>。准备审查。"（软断点，立即继续）
 
 ## 第 4 步：审查员
 
-按 `commands/web-dev-team/审查员.md` 步骤跑（一次消息并行 spawn 三审查员 → 汇总 → 修 → 循环 ≤ 3 轮）。
+按 `.claude/commands/web-dev-team/审查员.md` 步骤跑（一次消息并行 spawn 三审查员 → 汇总 → 修 → 循环 ≤ 3 轮）。
 
 ## 第 5 步：最终总结
 

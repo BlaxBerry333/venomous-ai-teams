@@ -20,7 +20,7 @@ argument-hint: <需求描述，可含参考站 URL>
 
 ## 第 2 步：参考拆解（有 URL 时）
 
-按 `commands/web-design-team/参考拆解.md` 步骤跑，传 URL + slug。
+按 `.claude/commands/web-design-team/参考拆解.md` 步骤跑，传 URL + slug。
 
 完成后向用户单行播报："拆解完成：refs/<YYYYMMDD_slug>/analysis.md"，**不等确认**直接进第 3 步。
 
@@ -28,7 +28,7 @@ argument-hint: <需求描述，可含参考站 URL>
 
 ## 第 3 步：设计师
 
-按 `commands/web-design-team/设计师.md` 跑，传需求 + slug + 拆解报告路径（如有）。
+按 `.claude/commands/web-design-team/设计师.md` 跑，传需求 + slug + 拆解报告路径（如有）。
 
 完成后输出**设计稿摘要 5 列汇报表** + design-spec 路径 + 「确认无误请回复 OK；有问题指出我改。回复 OK 后我接执行者 + 审查员」
 
@@ -48,13 +48,13 @@ argument-hint: <需求描述，可含参考站 URL>
 
 ## 第 5 步：执行者
 
-按 `commands/web-design-team/执行者.md` 跑，参数 = design-spec 路径 + 显式标记 `[调度模式]`（让执行者跳过自己的尾部总结，由本调度统一收口）。
+按 `.claude/commands/web-design-team/执行者.md` 跑，参数 = design-spec 路径 + 显式标记 `[调度模式]`（让执行者跳过自己的尾部总结，由本调度统一收口）。
 
 执行者会播报一行技术状态（路径 + build 通过 + checklist），不要在调度层重复播报；直接进第 6 步。
 
 ## 第 6 步：审查员
 
-按 `commands/web-design-team/审查员.md` 跑（一次消息并行 spawn 三审查员 → 汇总 → 修 → 循环 ≤ 3 轮），参数末尾追加 `[调度模式]`（让审查员跳过自己的最终总结，由本调度统一收口）。
+按 `.claude/commands/web-design-team/审查员.md` 跑（一次消息并行 spawn 三审查员 → 汇总 → 修 → 循环 ≤ 3 轮），参数末尾追加 `[调度模式]`（让审查员跳过自己的最终总结，由本调度统一收口）。
 
 ## 第 7 步：最终总结
 

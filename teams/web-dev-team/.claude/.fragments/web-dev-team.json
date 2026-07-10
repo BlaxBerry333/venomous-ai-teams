@@ -4,6 +4,7 @@
       "Bash(sudo *)",
       "Bash(shutdown*)",
       "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
       "Bash(curl * | sh)"
     ]
   },
